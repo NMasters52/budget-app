@@ -5,9 +5,12 @@ const BillsTable = () => {
   return (
     <table>
       {bills.length > 0 ? (
-        <tr>
-          <th>Bills are here</th>
-        </tr>
+        bills.map((bill) => (
+          <tr id={bill.title}>
+            <th>{bill.title}</th>
+            <td>{bill.amount}</td>
+          </tr>
+        ))
       ) :
       <tr>
         <th>No Bills to show</th>
