@@ -3,19 +3,33 @@ import bills from '../data/bills'
 
 const BillsTable = () => {
   return (
-    <table>
-      {bills.length > 0 ? (
-        bills.map((bill) => (
-          <tr id={bill.title}>
-            <th>{bill.title}</th>
-            <td>{bill.amount}</td>
+    <table className="table-auto w-full border-collapse border border-black">
+      <thead>
+        <tr>
+          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Bill Names</th>
+          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Cost</th>
+          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Frequency</th>
+          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Next Due Date</th>
+          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Last Paid</th>
+        </tr>
+      </thead>
+        <tbody>
+          {bills.length > 0 ? (
+            bills.map((bill) => (
+              <tr id={bill.id}>
+                <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
+                <td className="text-center px-4 py-2 border border-black">{bill.amount}</td>
+                <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
+                <td className="text-center px-4 py-2 border border-black">{bill.nextDue}</td>
+                <td className="text-center px-4 py-2 border border-black">{bill.lastPaid}</td>
+              </tr>
+            ))
+          ) :
+          <tr>
+            <td>NO bills to show</td>
           </tr>
-        ))
-      ) :
-      <tr>
-        <th>No Bills to show</th>
-      </tr>
-      }
+          }
+        </tbody>
     </table>
   )
 }
