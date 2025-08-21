@@ -7,3 +7,10 @@ export function addDays(date, days) {
 export function formatLocaleDate(date) {
     return date.toLocaleDateString();
 }
+
+export function isBillPaid(dueDate, todaysDate) {
+    if (dueDate < todaysDate) {
+        return true;
+    }
+    return false;
+}
