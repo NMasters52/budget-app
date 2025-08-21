@@ -7,7 +7,7 @@ import BillsList from './components/BillsList'
 //utilities 
 import { addDays } from './utils';
 import initialBills from './data/bills';
-
+import AddBills from './services/AddBills';
 
 const App = () => {
 
@@ -26,6 +26,7 @@ const App = () => {
       <h1>Budget App</h1>
       <BillsTable bills={bills} />
       <BillsList bills={bills} today={today} weekFromToday={weekFromToday} />
+      <AddBills bills={bills} setBills={setBills} />
     </div>
   )
 }
