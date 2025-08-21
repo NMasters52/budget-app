@@ -16,7 +16,7 @@ const BillsTable = () => {
         <tbody>
           {bills.length > 0 ? (
             bills.map((bill) => (
-              <tr id={bill.id}>
+              <tr key={bill.id}>
                 <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.amount}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
@@ -26,7 +26,7 @@ const BillsTable = () => {
             ))
           ) :
           <tr>
-            <td>NO bills to show</td>
+            <td>No bills to show</td>
           </tr>
           }
         </tbody>
