@@ -1,4 +1,4 @@
-const bills = [
+const initialBills = [
     {
         id: 1,
         title: 'Rent',
@@ -28,4 +28,4 @@ const bills = [
     },
 ];
 
-export default bills;
+export default initialBills;

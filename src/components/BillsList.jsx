@@ -1,7 +1,7 @@
-import bills from "../data/bills"
+
 import { formatLocaleDate, isBillPaid } from "../utils"
 
-const BillsList = ({ today, weekFromToday }) => {
+const BillsList = ({ today, weekFromToday, bills }) => {
 
     const filteredBills = bills.filter(bill => bill.nextDue < formatLocaleDate(weekFromToday) || bill.nextDue > formatLocaleDate(today));
 
