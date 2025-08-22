@@ -1,5 +1,5 @@
 
-import { formatLocaleDate, isBillPaid } from "../utils"
+import { formatLocaleDate, isBillPaid } from "../utils/dateUtils"
 
 const BillsList = ({ today, weekFromToday, bills }) => {
 
