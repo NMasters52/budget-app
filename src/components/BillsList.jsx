@@ -3,18 +3,16 @@ import { formatLocaleDate, isBillPaid } from "../utils/dateUtils"
 
 const BillsList = ({ today, weekFromToday, bills }) => {
 
-    const filteredBills = bills.filter(bill => bill.nextDue < formatLocaleDate(weekFromToday) || bill.nextDue > formatLocaleDate(today));
+    const filteredBills = bills.filter(bill => bill.nextDue <= formatLocaleDate(weekFromToday) || bill.nextDue >= formatLocaleDate(today));
 
-    const justBillCosts = bills.map(bill => bill.amount);
-    
-    const addBillCosts = (arr) => arr.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    const totalCost = filteredBills.reduce((acc, bill) => acc + bill.amount, 0);
 
   return (
     <div className="flex flex-col items-center justify center mt-5">
         <h2 className="font-black">Bills Upcoming</h2>
         <div className="text-center">
             <p>{formatLocaleDate(today)} - {formatLocaleDate(weekFromToday)} </p>
-            <p>Total Amount needed: ${addBillCosts(justBillCosts)}</p>
+            <p>Total Amount needed: ${totalCost}</p>
         </div>
         
         {filteredBills.length > 0 ? (
