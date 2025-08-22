@@ -23,13 +23,13 @@ const AddBills = ( { bills, setBills, today } ) => {
     const submitNewBill = () => {
         const newBill = {
             id: uuidv4(),
-            amount: parseFloat(formData.amount),
-            ...formData
+            ...formData,
+            amount: parseFloat(formData.amount)
         };
         setBills([...bills, newBill])
     }
 
-    console.log(formData)
+    console.log(bills)
 
   return (
     <>
