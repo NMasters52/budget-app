@@ -1,7 +1,8 @@
 import React from 'react'
-import bills from '../data/bills'
 
-const BillsTable = () => {
+
+const BillsTable = ({ bills }) => {
+
   return (
     <table className="table-auto w-full border-collapse border border-black">
       <thead>

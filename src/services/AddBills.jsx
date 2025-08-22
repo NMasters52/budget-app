@@ -5,8 +5,8 @@ const AddBills = ( { bills, setBills, today } ) => {
 
    
     const [formData, setFormData] = useState({
-        title: '',
-        amount: 1,
+        title: "",
+        amount: 0,
         frequency: 'monthly',
         nextDue: "",
         lastPaid: "",
@@ -20,46 +20,101 @@ const AddBills = ( { bills, setBills, today } ) => {
         })
     }
 
-    const submitNewBill = () => {
+    const submitNewBill = (e) => {
+        e.preventDefault();
         const newBill = {
             id: uuidv4(),
             ...formData,
             amount: parseFloat(formData.amount)
         };
         setBills([...bills, newBill])
+        setFormData({
+            title: "",
+            amount: 0,
+            frequency: 'monthly',
+            nextDue: "",
+            lastPaid: "",
+            paymentHistory: []
+        }
+        )
     }
 
-    console.log(bills)
 
   return (
-    <>
-        <p>Add Bills</p>
-        <label htmlFor="title">Title</label>
-        <input type="text" name='title' value={formData.title} onChange={(e) => handleChange(e)}/>
-        <label htmlFor="amount">Bills Amount</label>
-        <input type="number" step='1' name='amount' value={formData.amount} onChange={(e) => handleChange(e)}/>
-        <label htmlFor="nextDue">Next Billing Date</label>
-        <input type="date" name="nextDue" placeholder={today} value={formData.nextDue} onChange={(e) => handleChange(e)}/>
-        <label htmlFor="lastPaid">Last Paid Date</label>
-        <input type="date" name="lastPaid" placeholder={today} value={formData.lastPaid} onChange={(e) => handleChange(e)}/>
-        <label htmlFor="frequency">Bill Frequency</label>
-        <select 
-            name="frequency"
-            value={formData.frequency}
-            onChange={(e) => handleChange(e)}
-        >
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Bi Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="biannually">Bi Annually</option>
-            <option value="yearly">Yearly</option>
-        </select>
+    <form className="w-lg border-2 border-gray-500 rounded-lg shadow-md mx-auto p-4">
+        <h3 className="mb-4 p-2 font-bold text-2xl">Add New Bill</h3>
+
+        <div className="mb-4">
+            <label htmlFor="title" className="block font-semibold">Bill Title:</label>
+            <input 
+                type="text" 
+                name='title' 
+                value={formData.title} 
+                onChange={(e) => handleChange(e)}
+                className="w-full border-2 border-black rounded-sm p-2"
+            />
+        </div>
+        
+        
+        <div className="mb-4">
+            <label htmlFor="amount" className="block font-semibold">Bill Amount:</label>
+            <input 
+                type="number"  
+                name='amount' 
+                value={formData.amount} 
+                onChange={(e) => handleChange(e)}
+                className="w-full border-2 border-black rounded-sm p-2"
+            />
+        </div>
+
+        <div className="mb-4">
+            <label htmlFor="nextDue" className="block font-semibold">Next Billing Date:</label>
+            <input 
+                type="date" 
+                name="nextDue" 
+                placeholder={today} 
+                value={formData.nextDue} 
+                onChange={(e) => handleChange(e)}
+                className="w-full border-2 border-black rounded-sm p-2"
+            />
+        </div>
+        
+        <div className="mb-4">
+            <label htmlFor="lastPaid" className="block font-semibold">Last Paid Date:</label>
+            <input 
+                type="date" 
+                name="lastPaid" 
+                placeholder={today} 
+                value={formData.lastPaid} 
+                onChange={(e) => handleChange(e)}
+                className="w-full border-2 border-black rounded-sm p-2"
+            />
+        </div>
+      
+        <div className="mb-4">
+            <label htmlFor="frequency" className="block font-semibold">Bill Frequency:</label>
+            <select 
+                name="frequency"
+                value={formData.frequency}
+                onChange={(e) => handleChange(e)}
+                className="w-full border-2 border-black rounded-sm p-2"
+            >
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Bi Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="biannually">Bi Annually</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+        
+
         <button
             onClick={submitNewBill}
+            className="bg-blue-600 hover:bg-blue-300 cursor-pointer w-full shadow-md rounded-lg text-white p-2"
         >
             Add New Bill 🤮
         </button>
-    </>
+    </form>
   )
 }
 
