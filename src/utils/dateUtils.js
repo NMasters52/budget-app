@@ -5,7 +5,7 @@ export function addDays(date, days) {
 }
 
 export function formatLocaleDate(date) {
-    return date.toLocaleDateString();
+    return new Date(date).toLocaleDateString();
 }
 
 export function isBillPaid(dueDate, todaysDate) {

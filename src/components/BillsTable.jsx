@@ -1,5 +1,6 @@
 import React from 'react'
 import DeleteBills from '../services/DeleteBills'
+import { formatLocaleDate } from '../utils/dateUtils'
 
 
 const BillsTable = ({ bills, setBills }) => {
@@ -23,8 +24,8 @@ const BillsTable = ({ bills, setBills }) => {
                 <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.amount}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
-                <td className="text-center px-4 py-2 border border-black">{bill.nextDue}</td>
-                <td className="text-center px-4 py-2 border border-black">{bill.lastPaid}</td>
+                <td className="text-center px-4 py-2 border border-black">{formatLocaleDate(bill.nextDue)}</td>
+                <td className="text-center px-4 py-2 border border-black">{formatLocaleDate(bill.lastPaid)}</td>
                 <td className="text-center px-4 py-2 border border-black"> <DeleteBills billID={bill.id} bills={bills} setBills={setBills} /> </td>
               </tr>
             ))
