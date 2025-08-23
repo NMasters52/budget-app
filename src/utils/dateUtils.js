@@ -14,3 +14,7 @@ export function isBillPaid(dueDate, todaysDate) {
     }
     return false;
 }
+
+export const toISODate = (dateString) => {
+    return new Date(dateString).toISOString().split('T')[0];
+};

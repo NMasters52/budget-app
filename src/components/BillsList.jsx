@@ -1,14 +1,19 @@
 
-import { formatLocaleDate, isBillPaid } from "../utils/dateUtils"
+import { formatLocaleDate, isBillPaid, toISODate } from "../utils/dateUtils"
 
 const BillsList = ({ today, weekFromToday, bills }) => {
 
-    const filteredBills = bills.filter(bill => bill.nextDue <= formatLocaleDate(weekFromToday) || bill.nextDue >= formatLocaleDate(today));
+    const filteredBills = bills.filter(bill => 
+        bill.nextDue >= toISODate(today) && 
+        bill.nextDue <= toISODate(weekFromToday)
+    );
+
+    console.log(formatLocaleDate(weekFromToday), bills)
 
     const totalCost = filteredBills.reduce((acc, bill) => acc + bill.amount, 0);
 
   return (
-    <div className="flex flex-col items-center justify-center mt-5">
+    <div className="flex flex-col items-center justify-center mt-5 mb-5">
         <h2 className="font-black">Bills Upcoming</h2>
         <div className="text-center">
             <p>{formatLocaleDate(today)} - {formatLocaleDate(weekFromToday)} </p>
@@ -27,7 +32,7 @@ const BillsList = ({ today, weekFromToday, bills }) => {
                 </div>
             ))
         ) : 
-        <p> no bills to show</p>}
+        <p className="font-black text-xl mt-2">No bills to show... Add a bill below.</p>}
     </div>
   )
 }

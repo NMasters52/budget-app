@@ -30,7 +30,7 @@ const BillsTable = ({ bills, setBills }) => {
             ))
           ) :
           <tr>
-            <td>No bills to show</td>
+            <td className="p-2">No bills to show. Add a new bill to begin.</td>
           </tr>
           }
         </tbody>
