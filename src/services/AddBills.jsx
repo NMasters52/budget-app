@@ -27,7 +27,9 @@ const AddBills = ( { bills, setBills, today } ) => {
             ...formData,
             amount: parseFloat(formData.amount)
         };
-        setBills([...bills, newBill])
+        //add new bill to bills state
+        setBills([...bills, newBill]);
+        //reset form
         setFormData({
             title: "",
             amount: 0,
@@ -54,8 +56,7 @@ const AddBills = ( { bills, setBills, today } ) => {
                 className="w-full border-2 border-black rounded-sm p-2"
             />
         </div>
-        
-        
+          
         <div className="mb-4">
             <label htmlFor="amount" className="block font-semibold">Bill Amount:</label>
             <input 

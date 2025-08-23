@@ -6,12 +6,14 @@ import BillsList from './components/BillsList'
 
 //utilities 
 import { addDays } from './utils/dateUtils';
-import initialBills from './data/bills';
 import AddBills from './services/AddBills';
 
 const App = () => {
 
-  const [bills, setBills] = useState(() => initialBills.length ? initialBills : [])
+  const [bills, setBills] = useState(() => {
+    const bills = JSON.parse(localStorage.getItem('bills'));
+    return bills || [];
+  })
   const [today, setToday] = useState(new Date());
   const [weekFromToday, setWeekFromToday] = useState(new Date());
   
@@ -20,6 +22,10 @@ const App = () => {
       setToday(currentDate);
       setWeekFromToday(addDays(currentDate, 7));
   }, []);
+
+  useEffect(() => {
+      localStorage.setItem('bills', JSON.stringify(bills))
+  }, [bills]) 
 
   return (
     <div className="">

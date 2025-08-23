@@ -7,8 +7,6 @@ const BillsList = ({ today, weekFromToday, bills }) => {
 
     const totalCost = filteredBills.reduce((acc, bill) => acc + bill.amount, 0);
 
-    console.log(`this is the bills list version of bills ${console.table(bills)}`)
-
   return (
     <div className="flex flex-col items-center justify-center mt-5">
         <h2 className="font-black">Bills Upcoming</h2>
