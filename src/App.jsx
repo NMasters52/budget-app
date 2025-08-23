@@ -28,12 +28,12 @@ const App = () => {
   }, [bills]) 
 
   return (
-    <div className="">
-      <h1>Budget App</h1>
-      <BillsTable bills={bills} />
+    <main className="p-5 w-max-xl">
+      <h1 className="text-2xl font-black mb-2">💰 Budget App</h1>
+      <BillsTable bills={bills} setBills={setBills} />
       <BillsList bills={bills} today={today} weekFromToday={weekFromToday} />
       <AddBills bills={bills} setBills={setBills} today={today} />
-    </div>
+    </main>
   )
 }
 

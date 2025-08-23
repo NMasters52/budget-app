@@ -1,7 +1,8 @@
 import React from 'react'
+import DeleteBills from '../services/DeleteBills'
 
 
-const BillsTable = ({ bills }) => {
+const BillsTable = ({ bills, setBills }) => {
 
   return (
     <table className="table-auto w-full border-collapse border border-black">
@@ -12,6 +13,7 @@ const BillsTable = ({ bills }) => {
           <th className="text-center px-4 py-2 bg-gray-200 border border-black">Frequency</th>
           <th className="text-center px-4 py-2 bg-gray-200 border border-black">Next Due Date</th>
           <th className="text-center px-4 py-2 bg-gray-200 border border-black">Last Paid</th>
+          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Delete Bill</th>
         </tr>
       </thead>
         <tbody>
@@ -23,6 +25,7 @@ const BillsTable = ({ bills }) => {
                 <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.nextDue}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.lastPaid}</td>
+                <td className="text-center px-4 py-2 border border-black"> <DeleteBills billID={bill.id} bills={bills} setBills={setBills} /> </td>
               </tr>
             ))
           ) :
