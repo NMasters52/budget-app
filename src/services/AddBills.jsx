@@ -103,6 +103,7 @@ const AddBills = ( { bills, setBills, today } ) => {
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Bi Weekly</option>
                 <option value="monthly">Monthly</option>
+                <option value="quartly">Quartly</option>
                 <option value="biannually">Bi Annually</option>
                 <option value="yearly">Yearly</option>
             </select>
