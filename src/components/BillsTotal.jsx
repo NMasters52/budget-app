@@ -1,20 +1,20 @@
-import { toISODate, addDays } from "../utils/dateUtils";
+import { toISODate, addDays, calculateYearlyTotal } from "../utils/dateUtils";
 
 const BillsTotal = ({ bills, today, weekFromToday }) => {
     
-    //amount to make it through the week
+    //all the bills added for the week
     const totalThisWeek = bills.filter(bill => 
         bill.nextDue >= toISODate(today) && 
         bill.nextDue <= toISODate(weekFromToday)
     )
     .reduce((acc, bill) => acc + bill.amount, 0);
 
-    //amount to make it through the month
+    //all the bills added for the month
     const monthFromToday = addDays(today, 31);
     const totalThisMonth = bills.filter((bill) => bill.nextDue >= toISODate(today) && bill.nextDue <= toISODate(monthFromToday)).reduce((acc, bill) => acc + bill.amount, 0)
 
-    //amount to make it through the year
-    const totalThisYear = bills.reduce((acc, bill) => acc + bill.amount, 0 )
+    //all the bills added for the year
+    const totalThisYear = calculateYearlyTotal(bills)
 
   return (
     <div className="w-1/2 border-2 border-green-600 flex justify-center mx-auto space-x-4 p-2 rounded-md mt-2">

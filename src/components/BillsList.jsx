@@ -8,8 +8,6 @@ const BillsList = ({ today, weekFromToday, bills }) => {
         bill.nextDue <= toISODate(weekFromToday)
     );
 
-    console.log(formatLocaleDate(weekFromToday), bills)
-
     const totalCost = filteredBills.reduce((acc, bill) => acc + bill.amount, 0);
 
   return (
