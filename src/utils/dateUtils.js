@@ -58,7 +58,7 @@ export const calculateYearlyTotal = (bills) => {
 }
 
 //check if bill is paid and if so move to bill.paymentHistory
-export const markBillAdPaid = (bills, billId, paidDate = today) => {
+export const markBillAdPaid = (bills, billId, paidDate = new Date()) => {
     const paidDateString = toISODate(paidDate);
 
     bills.map((bill) => {
