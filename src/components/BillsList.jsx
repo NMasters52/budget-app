@@ -1,5 +1,5 @@
 
-import { formatLocaleDate, isBillPaid, toISODate } from "../utils/dateUtils"
+import { formatLocaleDate, toISODate } from "../utils/dateUtils"
 
 const BillsList = ({ today, weekFromToday, bills }) => {
 
@@ -24,8 +24,8 @@ const BillsList = ({ today, weekFromToday, bills }) => {
                     <h4 className='font-bold'>{bill.title}</h4>
                     <div className="flex space-x-2">
                         <p className="border-1 border-gray-500 p-2 rounded-xl text-sm">Amount: {bill.amount}</p>
-                        <p className="border-1 border-gray-500 p-2 rounded-xl text-sm">Due Date: {formatLocaleDate(bill.nextDue)}</p>
-                        <p className="border-1 border-gray-500 p-2 rounded-xl text-sm">Paid for this month: {isBillPaid(bill.nextDue, today) ? '✅' : '❌'}</p>
+                        <p className="border-1 border-gray-500 p-2 rounded-xl text-sm">Due Date: {bill.nextDue}</p>
+                        <p className="border-1 border-gray-500 p-2 rounded-xl text-sm">Last Paid: {bill.lastPaid}</p>
                     </div>
                 </div>
             ))

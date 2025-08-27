@@ -13,8 +13,6 @@ const BillsTable = ({ bills, setBills, today }) => {
   const getBillStatus = (bill) => {
     const nextDue = new Date(bill.nextDue);
     const todaysDate = new Date(today);
-    console.log(nextDue > todaysDate)
-    
     
     const monthStart = new Date(todaysDate.getFullYear(), todaysDate.getMonth(), 1);
     const monthEnd = new Date(todaysDate.getFullYear(), todaysDate.getMonth() + 1, 0);
@@ -36,8 +34,6 @@ const BillsTable = ({ bills, setBills, today }) => {
 
     return {text: 'Pending', color: 'bg-blue-500'};
   }
-
-  console.log(bills.length)
 
   return (
     <table className="table-auto w-full border-collapse border border-black">
@@ -68,8 +64,10 @@ const BillsTable = ({ bills, setBills, today }) => {
                 <td className={`text-center px-4 py-2 border border-black ${status.color}`}>{status.text}</td>
                 <td className="text-center px-4 py-2 border border-black">
                   <button 
-                    className="cursor-pointer bg-green-500 text-white p-2 hover:bg-green-600 shadow-md rounded-md"
+                    className={`${status.text === 'Paid' ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600 cursor-pointer'}  text-white p-2  shadow-md rounded-md`}
                     onClick={() => handleMarkPaid(bill.id)}
+                    onWheel={(e) => e.preventDefault()}
+                    disabled={status.text === 'Paid'}
                   >
                     Mark Paid
                   </button>

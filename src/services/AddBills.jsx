@@ -64,6 +64,7 @@ const AddBills = ( { bills, setBills, today } ) => {
                 name='amount' 
                 value={formData.amount} 
                 onChange={(e) => handleChange(e)}
+                onWheel={(e) => e.target.blur()}
                 className="w-full border-2 border-black rounded-sm p-2"
             />
         </div>
