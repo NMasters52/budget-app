@@ -14,6 +14,7 @@ export function formatLocaleDate(date) {
     return new Date(date).toLocaleDateString();
 }
 
+//replced with isBillPaidThisPeriod
 export function isBillPaid(dueDate, todaysDate) {
     if (dueDate < todaysDate) {
         return true;
@@ -25,7 +26,7 @@ export const toISODate = (dateString) => {
     return new Date(dateString).toISOString().split('T')[0];
 };
 
-//calculate total bills for the year
+//helps calculate total bills for the year
 export const calculateYearlyTotal = (bills) => {
     return bills.reduce((yearlyTotal, bill) => {
         let annualAmount;
@@ -57,7 +58,7 @@ export const calculateYearlyTotal = (bills) => {
     }, 0);
 }
 
-//check if bill is paid and if so move to bill.paymentHistory
+//helps check if bill is paid and if so move to bill.paymentHistory
 export const markBillAdPaid = (bills, billId, paidDate = new Date()) => {
     const paidDateString = toISODate(paidDate);
 
@@ -101,3 +102,11 @@ export const markBillAdPaid = (bills, billId, paidDate = new Date()) => {
         return bill;
 });
 };
+
+//helps check if the bill being passed is paid 
+export const isBillPaidThisPeriod = (bill, periodStart, periodEnd) => {
+    if (!bill.lastPaid) return false;
+
+    const lastPaid = new Date(bill.lastPaid);
+    return lastPaid >= new Date(periodStart) && lastPaid <= new Date(periodEnd);
+}
