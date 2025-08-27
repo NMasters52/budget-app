@@ -13,6 +13,8 @@ const BillsTable = ({ bills, setBills, today }) => {
   const getBillStatus = (bill) => {
     const nextDue = new Date(bill.nextDue);
     const todaysDate = new Date(today);
+    console.log(nextDue > todaysDate)
+    
     
     const monthStart = new Date(todaysDate.getFullYear(), todaysDate.getMonth(), 1);
     const monthEnd = new Date(todaysDate.getFullYear(), todaysDate.getMonth() + 1, 0);
@@ -21,15 +23,15 @@ const BillsTable = ({ bills, setBills, today }) => {
       return {text: 'Paid', color: 'bg-green-500'};
     }
 
+    if (nextDue < todaysDate) {
+      return {text: 'Over Due', color: 'bg-red-500'};
+    }
+
     const sevenDaysFromNow = new Date(todaysDate);
     sevenDaysFromNow.setDate(todaysDate.getDate() + 7);
 
     if (nextDue <= sevenDaysFromNow) {
         return {text: 'Due Soon', color: 'bg-yellow-500'};
-    }
-
-    if (nextDue < todaysDate) {
-      return {text: 'Over Due', color: 'bg-red-500'};
     }
 
     return {text: 'Pending', color: 'bg-blue-500'};
