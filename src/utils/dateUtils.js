@@ -1,12 +1,12 @@
 export function addDays(date, days) {
     const newDate = new Date(date);
-    newDate.setDate(date.getDate() + days);
+    newDate.setDate(newDate.getDate() + days);
     return newDate;
 }
 
 export function addMonths(date, months) {
     const newDate = new Date(date);
-    newDate.setMonth(date.getMonth() + months);
+    newDate.setMonth(newDate.getMonth() + months)
     return newDate;
 }
 
@@ -59,33 +59,33 @@ export const calculateYearlyTotal = (bills) => {
 }
 
 //helps check if bill is paid and if so move to bill.paymentHistory
-export const markBillAdPaid = (bills, billId, paidDate = new Date()) => {
+export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
     const paidDateString = toISODate(paidDate);
 
-    bills.map((bill) => {
+    return bills.map((bill) => {
         if (bill.id === billId) {
             let newDueDate;
             switch (bill.frequency) {
             case 'weekly':
-                newDueDate = addDays(bill.dueDate, 7);
+                newDueDate = addDays(bill.nextDue, 7);
                 break;
             case 'biweekly':
-             newDueDate = addDays(bill.dueDate, 14);
+             newDueDate = addDays(bill.nextDue, 14);
                 break;
             case 'monthly':
-             newDueDate = addMonths(bill.dueDate, 1);
+             newDueDate = addMonths(bill.nextDue, 1);
                 break;
             case 'quartly':
-             newDueDate = addMonths(bill.dueDate, 3);
+             newDueDate = addMonths(bill.nextDue, 3);
                 break;
             case 'biannually':
-             newDueDate = addMonths(bill.dueDate, 6);
+             newDueDate = addMonths(bill.nextDue, 6);
                 break;
             case 'yearly':
-             newDueDate = addMonths(bill.dueDate, 12);
+             newDueDate = addMonths(bill.nextDue, 12);
                 break;
             default:
-                console.warn(`uknown bill frequency ${bill.frequency} in bill: ${bill.name}`);
+                console.warn(`uknown bill frequency ${bill.frequency} in bill: ${bill.title}`);
                 return bill;
             }
 
