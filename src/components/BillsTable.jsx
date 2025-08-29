@@ -1,9 +1,38 @@
+import { useMemo, useState } from 'react'
 import DeleteBills from '../services/DeleteBills'
 import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
 import BillsTotal from './BillsTotal'
 
 
-const BillsTable = ({ bills, setBills, today, weekFromToday }) => {
+const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
+
+  const [filter, setFilter] = useState('');
+
+  const handleFilter = (e) => {
+    setFilter(e.target.value)
+    console.log(filter)
+  }
+
+  const filteredBills = useMemo(() => {
+    const list = bills.slice() //creating a shallow copy to not mutate state
+
+   return list.sort((a,b) => {
+      switch (filter) {
+        case 'ascendingPrice':
+          return a.amount - b.amount
+        case 'descendingPrice':
+          return b.amount - a.amount
+        case 'ascendingDate':
+          return new Date(a.nextDue).getTime() -
+                 new Date(b.nextDue).getTime()
+        case 'descendingDate':
+          return new Date(b.nextDue).getTime() -
+                 new Date(a.nextDue).getTime()
+        default:
+          return 0
+      }
+    })
+  }, [bills, filter])
 
   const handleMarkPaid = (billId) => {
     const updatedBills = markBillAsPaid(bills, billId);
@@ -38,22 +67,37 @@ const BillsTable = ({ bills, setBills, today, weekFromToday }) => {
 
   return (
     <>
-    <table className="table-auto w-max-96 mx-auto border-collapse border border-black">
+    <div className=" bg-white mb-2 w-[300px] mx-auto flex justify-between border-2 border-gray-500 p-2 rounded-md">
+      <h3 className="font-bold text-xl">Filters:</h3>
+      <select 
+        id="filterBills"
+        value={filter}
+        onChange={(e) => handleFilter(e)}
+        className="border-2 border-black text-sm"
+      >
+        <option value="">Select Filter</option>
+        <option value="ascendingPrice"> Price: Low → High</option>
+        <option value="descendingPrice">Price: High → Low</option>
+        <option value="ascendingDate">Date: Earliest → Latest</option>
+        <option value="descendingDate">Date: Latest → Earliest</option>
+      </select>
+    </div>
+    <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
       <thead>
         <tr>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Bill Names</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Cost</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Frequency</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Next Due Date</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Last Paid</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Bill Status</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Mark Paid</th>
-          <th className="text-center px-4 py-2 bg-gray-200 border border-black">Delete Bill</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Names</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Cost</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Frequency</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Next Due Date</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Last Paid</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Status</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Mark Paid</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Delete Bill</th>
         </tr>
       </thead>
         <tbody>
-          {bills.length > 0 ? (
-            bills.map((bill) => {
+          {filteredBills.length > 0 ? (
+            filteredBills.map((bill) => {
               const status = getBillStatus(bill);
 
               return (

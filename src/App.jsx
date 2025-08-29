@@ -31,7 +31,7 @@ const App = () => {
   }, [bills]) 
 
   return (
-    <main>
+    <main className="bg-gray-100 h-screen">
       <Nav/>
       <Routes>
         <Route path="/" element={<BillsTable bills={bills} setBills={setBills} today={today} weekFromToday={weekFromToday} />} />
