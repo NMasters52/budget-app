@@ -6,7 +6,7 @@ const Nav = () => {
     const inactiveLink = "text-white text-lg font-semibold hover:underline underline-offset-4";
 
   return (
-    <nav className="p-4 bg-green-600 flex flex-row mb-6 justify-between">
+    <nav className="p-4 bg-green-600 flex flex-row mb-6 justify-between w-full mx-auto">
         <h1 className="text-xl font-bold text-white">💰 Budget App</h1>
         <div className="mr-4 flex flex-row space-x-4">
             <NavLink

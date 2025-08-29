@@ -1,5 +1,5 @@
 import DeleteBills from '../services/DeleteBills'
-import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid, toISODate } from '../utils/dateUtils'
+import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
 import BillsTotal from './BillsTotal'
 
 
@@ -38,7 +38,7 @@ const BillsTable = ({ bills, setBills, today, weekFromToday }) => {
 
   return (
     <>
-    <table className="table-auto w-full border-collapse border border-black">
+    <table className="table-auto w-max-96 mx-auto border-collapse border border-black">
       <thead>
         <tr>
           <th className="text-center px-4 py-2 bg-gray-200 border border-black">Bill Names</th>

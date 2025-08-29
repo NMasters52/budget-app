@@ -3,6 +3,7 @@ import {v4 as uuidv4} from 'uuid';
 
 const AddBills = ( { bills, setBills, today } ) => {
 
+    const [success, setSuccess] = useState(false);
    
     const [formData, setFormData] = useState({
         title: "",
@@ -39,12 +40,22 @@ const AddBills = ( { bills, setBills, today } ) => {
             paymentHistory: []
         }
         )
+        setSuccess(true);
+        setTimeout(() => {
+            setSuccess(false);
+        }, 3000);
     }
 
 
   return (
     <form className="w-lg border-2 border-gray-500 rounded-lg shadow-md mx-auto p-4">
         <h3 className="mb-4 p-2 font-bold text-2xl">Add New Bill</h3>
+
+        {success && 
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                ✅ Bill added successfully!
+            </div>
+        }
 
         <div className="mb-4">
             <label htmlFor="title" className="block font-semibold">Bill Title:</label>
@@ -109,7 +120,6 @@ const AddBills = ( { bills, setBills, today } ) => {
                 <option value="yearly">Yearly</option>
             </select>
         </div>
-        
 
         <button
             onClick={submitNewBill}

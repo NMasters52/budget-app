@@ -31,10 +31,10 @@ const App = () => {
   }, [bills]) 
 
   return (
-    <main className="w-max-xl">
-      <Nav />
+    <main>
+      <Nav/>
       <Routes>
-        <Route path="/" element={<BillsTable bills={bills} setBills={setBills} today={today} weekFromToday={weekFromToday} />}  />
+        <Route path="/" element={<BillsTable bills={bills} setBills={setBills} today={today} weekFromToday={weekFromToday} />} />
         <Route path="/list" element={<BillsList bills={bills} today={today} weekFromToday={weekFromToday} />}  />
         <Route path="/addBill" element={<AddBills bills={bills} setBills={setBills} today={today} />}  />
       </Routes>
