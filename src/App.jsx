@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 //components
 import BillsTable from './components/BillsTable'
 import BillsList from './components/BillsList'
+import AddBills from './services/AddBills';
+import Nav from './Nav'
 
 //utilities 
 import { addDays } from './utils/dateUtils';
-import AddBills from './services/AddBills';
-import BillsTotal from './components/BillsTotal';
+
 
 const App = () => {
 
@@ -29,12 +31,13 @@ const App = () => {
   }, [bills]) 
 
   return (
-    <main className="p-5 w-max-xl">
-      <h1 className="text-2xl font-black mb-2">💰 Budget App</h1>
-      <BillsTable bills={bills} setBills={setBills} today={today} />
-      <BillsTotal bills={bills} today={today} weekFromToday={weekFromToday} />
-      <BillsList bills={bills} today={today} weekFromToday={weekFromToday} />
-      <AddBills bills={bills} setBills={setBills} today={today} />
+    <main className="w-max-xl">
+      <Nav />
+      <Routes>
+        <Route path="/" element={<BillsTable bills={bills} setBills={setBills} today={today} weekFromToday={weekFromToday} />}  />
+        <Route path="/list" element={<BillsList bills={bills} today={today} weekFromToday={weekFromToday} />}  />
+        <Route path="/addBill" element={<AddBills bills={bills} setBills={setBills} today={today} />}  />
+      </Routes>
     </main>
   )
 }

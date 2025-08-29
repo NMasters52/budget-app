@@ -1,8 +1,9 @@
 import DeleteBills from '../services/DeleteBills'
-import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
+import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid, toISODate } from '../utils/dateUtils'
+import BillsTotal from './BillsTotal'
 
 
-const BillsTable = ({ bills, setBills, today }) => {
+const BillsTable = ({ bills, setBills, today, weekFromToday }) => {
 
   const handleMarkPaid = (billId) => {
     const updatedBills = markBillAsPaid(bills, billId);
@@ -36,6 +37,7 @@ const BillsTable = ({ bills, setBills, today }) => {
   }
 
   return (
+    <>
     <table className="table-auto w-full border-collapse border border-black">
       <thead>
         <tr>
@@ -66,7 +68,6 @@ const BillsTable = ({ bills, setBills, today }) => {
                   <button 
                     className={`${status.text === 'Paid' ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600 cursor-pointer'}  text-white p-2  shadow-md rounded-md`}
                     onClick={() => handleMarkPaid(bill.id)}
-                    onWheel={(e) => e.preventDefault()}
                     disabled={status.text === 'Paid'}
                   >
                     Mark Paid
@@ -83,6 +84,8 @@ const BillsTable = ({ bills, setBills, today }) => {
           }
         </tbody>
     </table>
+    <BillsTotal bills={bills} today={today}  weekFromToday={weekFromToday}/>
+    </>
   )
 }
 
