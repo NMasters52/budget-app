@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import DeleteBills from '../services/DeleteBills'
 import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
 import BillsTotal from './BillsTotal'
+import { Link } from 'react-router-dom'
 
 
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
@@ -65,6 +66,8 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
     return {text: 'Pending', color: 'bg-blue-500'};
   }
 
+  const addBillsLinkStyles = "text-green-500 hover:underline hover:underline-offset-4"
+
   return (
     <>
     <div className=" bg-white mb-2 w-[300px] mx-auto flex justify-between border-2 border-gray-500 p-2 rounded-md">
@@ -103,7 +106,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
               return (
                 <tr key={bill.id}>
                 <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
-                <td className="text-center px-4 py-2 border border-black">{bill.amount}</td>
+                <td className="text-center px-4 py-2 border border-black">${bill.amount}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
                 <td className="text-center px-4 py-2 border border-black">{formatLocaleDate(bill.nextDue)}</td>
                 <td className="text-center px-4 py-2 border border-black">{formatLocaleDate(bill.lastPaid)}</td>
@@ -123,7 +126,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
             })
           ) :
           <tr>
-            <td className="p-2">No bills to show. Add a new bill to begin.</td>
+            <td className="p-2">No bills to show. Add a new bill <Link to="/addBill" className={addBillsLinkStyles}>here</Link>.</td>
           </tr>
           }
         </tbody>
