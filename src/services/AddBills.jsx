@@ -63,6 +63,7 @@ const AddBills = ( { bills, setBills, today } ) => {
                 type="text" 
                 name='title' 
                 value={formData.title} 
+                placeholder='Rent'
                 onChange={(e) => handleChange(e)}
                 className="w-full border-2 border-black rounded-sm p-2"
             />

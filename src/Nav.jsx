@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 
 const Nav = () => {
 
@@ -6,20 +6,24 @@ const Nav = () => {
     const inactiveLink = "text-white text-lg font-semibold hover:underline underline-offset-4";
 
   return (
-    <nav className="p-4 bg-green-600 flex flex-row mb-6 justify-between w-full mx-auto">
-        <h1 className="text-xl font-bold text-white">💰 Budget App</h1>
-        <div className="mr-4 flex flex-row space-x-4">
+    <nav className="p-4 bg-green-600 flex flex-row mb-6 justify-between items-center w-full mx-auto">
+        <div className="bg-white flex p-2 rounded items-center">
+            <img src="./public/bill.png" alt="Budget Buddy Mascot" className="h-[50px] mr-2" />
+            <h1 className="text-xl font-bold"> Budget Buddy </h1>
+        </div>
+        
+        <div className="mr-4 flex flex-row space-x-6">
             <NavLink
                 to="/" 
                 className={({isActive}) => isActive ? activeLink : inactiveLink }
             >
-                Overview
+                Bills Overview
             </NavLink>
             <NavLink 
                 to="/list" 
                 className={({isActive}) => isActive ? activeLink : inactiveLink }
             >
-                Bills List
+                Bills Preview
             </NavLink>
             <NavLink
                 to="/addBill" 

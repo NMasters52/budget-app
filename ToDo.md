@@ -1,3 +1,1 @@
 - add editing to the bills
-- feat to bills list, choose which weeks to view so you can look into the future. Change it to bills preview 
-- rename to bill buddy

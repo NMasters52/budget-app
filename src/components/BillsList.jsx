@@ -20,7 +20,7 @@ const BillsList = ({ today, bills }) => {
   return (
     <div className="flex flex-col items-center justify-center mt-5">
         <div className="text-center bg-white p-4 border-2 border-gray-400 rounded-md">
-            <h2 className="font-black text-xl mb-1">Bills Upcoming</h2>
+            <h2 className="font-black text-xl mb-1">Bills Preview</h2>
             <div className="text-center">
                 <p>{formatLocaleDate(filteredDay)} - {formatLocaleDate(weekAfterFilteredDay)} </p>
                 <p>Total Amount Needed: ${totalCost}</p>
