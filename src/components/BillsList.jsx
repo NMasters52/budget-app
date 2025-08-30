@@ -1,22 +1,41 @@
+import { useState } from "react";
+import { formatLocaleDate, toISODate, addDays } from "../utils/dateUtils"
 
-import { formatLocaleDate, toISODate } from "../utils/dateUtils"
+const BillsList = ({ today, bills }) => {
 
-const BillsList = ({ today, weekFromToday, bills }) => {
+    const [filteredDay, setFilteredDay] = useState(new Date());
 
+    const weekAfterFilteredDay = addDays(filteredDay, 7);
+
+    //filtering bills by week
     const filteredBills = bills.filter(bill => 
-        bill.nextDue >= toISODate(today) && 
-        bill.nextDue <= toISODate(weekFromToday)
+        bill.nextDue >= toISODate(filteredDay) && 
+        bill.nextDue <= toISODate(weekAfterFilteredDay)
     );
 
     const totalCost = filteredBills.reduce((acc, bill) => acc + bill.amount, 0);
+
 
   return (
     <div className="flex flex-col items-center justify-center mt-5 mb-5">
         <h2 className="font-black">Bills Upcoming</h2>
         <div className="text-center">
-            <p>{formatLocaleDate(today)} - {formatLocaleDate(weekFromToday)} </p>
+            <p>{formatLocaleDate(filteredDay)} - {formatLocaleDate(weekAfterFilteredDay)} </p>
             <p>Total Amount needed: ${totalCost}</p>
         </div>
+
+        <div className="border-2 border-gray-500 p-2 rounded-md mt-2 ">
+            <label htmlFor="nextDue" className="text-md font-semibold">Choose starting date:</label>
+            <input 
+                type="date" 
+                name="nextDue" 
+                placeholder={today} 
+                value={toISODate(filteredDay)} 
+                onChange={(e) => setFilteredDay(e.target.valueAsDate)}
+                className="w-full border-2 border-black rounded-sm mt-2"
+            />
+        </div>
+
         
         {filteredBills.length > 0 ? (
             filteredBills.map((bill) => (
