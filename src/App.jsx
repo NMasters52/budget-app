@@ -17,18 +17,13 @@ const App = () => {
     const bills = JSON.parse(localStorage.getItem('bills'));
     return bills || [];
   })
-  const [today, setToday] = useState(new Date());
-  const [weekFromToday, setWeekFromToday] = useState(new Date());
-  
-  useEffect(() => {
-      const currentDate = new Date();
-      setToday(currentDate);
-      setWeekFromToday(addDays(currentDate, 7));
-  }, []);
 
   useEffect(() => {
       localStorage.setItem('bills', JSON.stringify(bills))
   }, [bills]) 
+
+  const today = new Date();
+  const weekFromToday = addDays(today, 7);
 
   return (
     <main className="bg-gray-100 h-screen">
