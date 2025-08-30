@@ -1,20 +1,22 @@
 import { useMemo, useState } from 'react'
-import DeleteBills from '../services/DeleteBills'
-import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
-import BillsTotal from './BillsTotal'
 import { Link } from 'react-router-dom'
+
+//components
+import DeleteBills from '../services/DeleteBills'
+import BillsTotal from './BillsTotal'
+import BillsFilter from './BillsFilter'
+
+//helper functions
+import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
+
 
 
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   const [filter, setFilter] = useState('');
 
-  const handleFilter = (e) => {
-    setFilter(e.target.value)
-    console.log(filter)
-  }
 
-  const filteredBills = useMemo(() => {
+  const filteredBills = useMemo(() => { //useMemo is used here to skip extra rerenders of the shallow array created
     const list = bills.slice() //creating a shallow copy to not mutate state
 
    return list.sort((a,b) => {
@@ -70,21 +72,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   return (
     <>
-    <div className=" bg-white mb-2 w-[300px] mx-auto flex justify-between border-2 border-gray-500 p-2 rounded-md">
-      <h3 className="font-bold text-xl">Filters:</h3>
-      <select 
-        id="filterBills"
-        value={filter}
-        onChange={(e) => handleFilter(e)}
-        className="border-2 border-black text-sm"
-      >
-        <option value="">Select Filter</option>
-        <option value="ascendingPrice"> Price: Low → High</option>
-        <option value="descendingPrice">Price: High → Low</option>
-        <option value="ascendingDate">Date: Earliest → Latest</option>
-        <option value="descendingDate">Date: Latest → Earliest</option>
-      </select>
-    </div>
+     <BillsFilter filter={filter} setFilter={setFilter} />
     <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
       <thead>
         <tr>
