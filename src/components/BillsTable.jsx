@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import DeleteBills from '../services/DeleteBills'
 import BillsTotal from './BillsTotal'
 import BillsFilter from './BillsFilter'
+import EditModal from './EditModal'
 
 //helper functions
 import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
@@ -14,6 +15,8 @@ import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   const [filter, setFilter] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [billsIDToEdit, setBillsIDToEdit] = useState("");
 
 
   const filteredBills = useMemo(() => { //useMemo is used here to skip extra rerenders of the shallow array created
@@ -70,8 +73,27 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   const addBillsLinkStyles = "text-green-500 hover:underline hover:underline-offset-4"
 
+  const openEditModal = (billID) => {
+    setIsEditModalOpen(true);
+    setBillsIDToEdit(billID);
+    console.log(billsIDToEdit)
+    
+  }
+
   return (
     <>
+    {isEditModalOpen && 
+      <div className="fixed inset-0  z-50">
+        <div 
+          className="flex items-center justify-center absolute inset-0 bg-black/30 backdrop-blur-sm" 
+          onClick={() => setIsEditModalOpen(false)}
+        >
+          <div className="relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
+           <EditModal isEditModalOpen={isEditModalOpen} setIsEditModalOpen={setIsEditModalOpen} billsIDToEdit={billsIDToEdit} bills={bills} />
+          </div>
+        </div>
+      </div>
+    }
      <BillsFilter filter={filter} setFilter={setFilter} />
     <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
       <thead>
@@ -84,6 +106,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
           <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Status</th>
           <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Mark Paid</th>
           <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Delete Bill</th>
+          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Edit Bill</th>
         </tr>
       </thead>
         <tbody>
@@ -109,6 +132,14 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
                   </button>
                 </td>
                 <td className="text-center px-4 py-2 border border-black"> <DeleteBills billID={bill.id} bills={bills} setBills={setBills} /> </td>
+                <td className="text-center px-4 py-2 border border-black"> 
+                  <button 
+                    className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer"
+                    onClick={() => openEditModal(bill.id)}
+                  >
+                    Edit Bills
+                  </button>
+                </td>
               </tr>
               )
             })
