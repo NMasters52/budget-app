@@ -8,11 +8,12 @@ import BillsFilter from './BillsFilter'
 import EditModal from './EditModal'
 
 //helper functions
-import { formatLocaleDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
+import { formatedDate, isBillPaidThisPeriod, markBillAsPaid } from '../utils/dateUtils'
 
 
 
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
+
 
   const [filter, setFilter] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -127,8 +128,8 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
                 <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
                 <td className="text-center px-4 py-2 border border-black">${bill.amount}</td>
                 <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
-                <td className="text-center px-4 py-2 border border-black">{formatLocaleDate(bill.nextDue)}</td>
-                <td className="text-center px-4 py-2 border border-black">{formatLocaleDate(bill.lastPaid)}</td>
+                <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.nextDue)}</td>
+                <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.lastPaid)}</td>
                 <td className={`text-center px-4 py-2 border border-black ${status.color}`}>{status.text}</td>
                 <td className="text-center px-4 py-2 border border-black">
                   <button 

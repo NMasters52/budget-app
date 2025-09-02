@@ -30,7 +30,7 @@ const BillsListCard = ({ bill }) => {
       const status = getBillStatus(bill);
 
   return (
-    <div dir="ltr"  className={`border-s-4 ${status.color} bg-white rounded-r-lg shadow-md px-2 py-4 my-2 flex flex-col space-y-2 w-lg mt-10`}>
+    <div dir="ltr"  className={`border-s-4 ${status.color} bg-white rounded-r-lg shadow-md px-2 py-4 flex flex-col space-y-2 w-lg mt-7`}>
         <h4 className='font-bold text-lg'>{bill.title}</h4>
         <div className="flex space-x-2">
             <p className="bg-blue-500 text-white p-2 rounded-xl text-sm font-semibold">Amount: ${bill.amount}</p>

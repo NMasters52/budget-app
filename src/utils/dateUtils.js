@@ -10,6 +10,24 @@ export function addMonths(date, months) {
     return newDate;
 }
 
+export function parseLocalDate(dateString) {
+  const [y, m, d] = dateString.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function formatedDate(dateOrString) {
+  // ensure we have a Date at local midnight
+  const dt = 
+    typeof dateOrString === 'string'
+      ? parseLocalDate(dateOrString)
+      : new Date(dateOrString);
+
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const d = String(dt.getDate()).padStart(2, '0');
+  return `${m}/${d}/${y}`;
+}
+
 export function formatLocaleDate(date) {
     return new Date(date).toLocaleDateString();
 }

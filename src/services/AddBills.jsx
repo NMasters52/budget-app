@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {v4 as uuidv4} from 'uuid';
+import { toISODate } from '../utils/dateUtils';
 
 const AddBills = ( { bills, setBills, today } ) => {
 
@@ -26,7 +27,9 @@ const AddBills = ( { bills, setBills, today } ) => {
         const newBill = {
             id: uuidv4(),
             ...formData,
-            amount: parseFloat(formData.amount)
+            amount: parseFloat(formData.amount),
+            nextDue: toISODate(formData.nextDue),
+            lastPaid: toISODate(formData.lastPaid)
         };
         //add new bill to bills state
         setBills([...bills, newBill]);
