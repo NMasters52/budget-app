@@ -11,7 +11,7 @@ const BillsTotal = ({ bills, today, weekFromToday }) => {
 
     //all the bills added for the month
     const monthFromToday = addDays(today, 31);
-    const totalThisMonth = bills.filter((bill) => bill.nextDue >= toISODate(today) && bill.nextDue <= toISODate(monthFromToday)).reduce((acc, bill) => acc + bill.amount, 0)
+    const totalThisMonth = bills.filter((bill) => bill.nextDue >= toISODate(today) && bill.nextDue <= toISODate(monthFromToday)).reduce((acc, bill) => acc + Number(bill.amount), 0)
 
     //all the bills added for the year
     const totalThisYear = calculateYearlyTotal(bills)
