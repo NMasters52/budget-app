@@ -20,8 +20,11 @@ const EditModal = ({ bill, onSave, onClose }) => {
 
     const handleSubmit = e => {
         e.preventDefault()
-
-        onSave(formData);
+        onSave({
+            ...formData,
+            id: bill.id,
+            
+        });
     }
 
   return (
@@ -106,7 +109,7 @@ const EditModal = ({ bill, onSave, onClose }) => {
             </button>
             <button 
                 className="p-2 cursor-pointer border-2 border-gray-500"
-                onClick={() => onClose(false)}
+                onClick={onClose}
             >
                 Cancel
             </button>

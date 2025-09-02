@@ -80,24 +80,28 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   const bill = bills.find(bill => bill.id === billsIDToEdit);
 
-  const onEditFormSubmit = (updatedForm) => {
-    setBills(bills.map(bill => bill.id === billsIDToEdit ? updatedForm : bill))
+  const onEditFormSubmit = (updated) => {
+    setBills(bills.map(bill => bill.id === updated.id ? updated : bill));
+    setIsEditModalOpen(false);
+    console.log(updated);
   }
 
   return (
     <>
-    {isEditModalOpen && 
+    {/* when the edit button is clicked */}
+    {isEditModalOpen && billsIDToEdit &&
       <div className="fixed inset-0  z-50">
         <div 
           className="flex items-center justify-center absolute inset-0 bg-black/30 backdrop-blur-sm" 
           
         >
           <div className="relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
-           <EditModal bill={bill} onClose={setIsEditModalOpen} onSave={onEditFormSubmit} />
+           <EditModal bill={bill} onClose={() => setIsEditModalOpen(false)} onSave={onEditFormSubmit} />
           </div>
         </div>
       </div>
     }
+
      <BillsFilter filter={filter} setFilter={setFilter} />
     <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
       <thead>
