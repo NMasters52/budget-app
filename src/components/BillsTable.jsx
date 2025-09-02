@@ -43,7 +43,6 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
   const handleMarkPaid = (billId) => {
     const updatedBills = markBillAsPaid(bills, billId);
     setBills(updatedBills);
-    console.log(bills)
   }
 
   const getBillStatus = (bill) => {
@@ -73,11 +72,16 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   const addBillsLinkStyles = "text-green-500 hover:underline hover:underline-offset-4"
 
+  // edit logics
   const openEditModal = (billID) => {
     setIsEditModalOpen(true);
     setBillsIDToEdit(billID);
-    console.log(billsIDToEdit)
-    
+  }
+
+  const bill = bills.find(bill => bill.id === billsIDToEdit);
+
+  const onEditFormSubmit = (updatedForm) => {
+    setBills(bills.map(bill => bill.id === billsIDToEdit ? updatedForm : bill))
   }
 
   return (
@@ -86,10 +90,10 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
       <div className="fixed inset-0  z-50">
         <div 
           className="flex items-center justify-center absolute inset-0 bg-black/30 backdrop-blur-sm" 
-          onClick={() => setIsEditModalOpen(false)}
+          
         >
           <div className="relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
-           <EditModal isEditModalOpen={isEditModalOpen} setIsEditModalOpen={setIsEditModalOpen} billsIDToEdit={billsIDToEdit} bills={bills} />
+           <EditModal bill={bill} onClose={setIsEditModalOpen} onSave={onEditFormSubmit} />
           </div>
         </div>
       </div>
