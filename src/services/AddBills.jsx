@@ -51,7 +51,7 @@ const AddBills = ( { bills, setBills, today } ) => {
 
 
   return (
-    <form className="w-lg border-2 border-gray-500 rounded-lg shadow-md mx-auto p-4">
+    <form className=" w-xs sm:w-lg md:w-xl p-4 border-2 border-gray-500 rounded-lg shadow-md mx-auto">
         <h3 className="mb-4 p-2 font-bold text-2xl">Add New Bill</h3>
 
         {success && 

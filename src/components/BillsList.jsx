@@ -18,7 +18,7 @@ const BillsList = ({ today, bills }) => {
 
 
   return (
-    <div className="flex flex-col items-center justify-center mt-5">
+    <div className="flex flex-col items-center justify-center mt-5 p-6">
         <div className="text-center bg-white p-4 border-2 border-gray-400 rounded-md">
             <h2 className="font-black text-xl mb-1">Bills Preview</h2>
             <div className="text-center">
@@ -26,7 +26,7 @@ const BillsList = ({ today, bills }) => {
                 <p>Total Amount Needed: ${totalCost}</p>
             </div>
 
-            <div className=" p-2 rounded-md mt-2 bg-white">
+            <div className="p-2 rounded-md mt-2 bg-white">
                 <label htmlFor="nextDue" className="text-md font-semibold">Choose starting date:</label>
                 <input 
                     type="date" 
@@ -34,7 +34,7 @@ const BillsList = ({ today, bills }) => {
                     placeholder={today} 
                     value={toISODate(filteredDay)} 
                     onChange={(e) => setFilteredDay(e.target.valueAsDate)}
-                    className="w-full border-2 border-black rounded-sm mt-2"
+                    className="w-full border-2 border-black rounded-sm mt-2 p-2"
                 />
             </div>
         </div>

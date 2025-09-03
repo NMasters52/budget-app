@@ -1,3 +1,1 @@
-- Make table mobile friendly
-- fix bill totals to be mobile friendly 
 - Deploy

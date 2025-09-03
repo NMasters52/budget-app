@@ -104,10 +104,12 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
     }
 
      <BillsFilter filter={filter} setFilter={setFilter} />
-      <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
+     <div className="mx-auto w-full px-4 sm:px-6">
+      <div className="relative overflow-x-auto">
+        <table className="bg-white table-auto w-max-96 mx-auto border-2 border-collapse border-gray-500">
         <thead>
           <tr>
-            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Names</th>
+            <th className="sticky left-0 z-20 outline outline-black text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Names</th>
             <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Cost</th>
             <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Frequency</th>
             <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Next Due Date</th>
@@ -125,7 +127,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
                 return (
                   <tr key={bill.id}>
-                  <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
+                  <td className="bg-white sticky left-0 z-10 outline outline-black text-center px-4 py-2 border border-black">{bill.title}</td>
                   <td className="text-center px-4 py-2 border border-black">${bill.amount}</td>
                   <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
                   <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.nextDue)}</td>
@@ -141,7 +143,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
                     </button>
                   </td>
                   <td className="text-center px-4 py-2 sm:px-3 sm:py-2 border border-black"> <DeleteBills billID={bill.id} bills={bills} setBills={setBills} /> </td>
-                  <td className="text-center px-4 py-2 border border-black"> 
+                  <td className="text-center px-4 py-2 sm:px-3 sm:py-2 border border-black"> 
                     <button 
                       className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer"
                       onClick={() => openEditModal(bill.id)}
@@ -159,8 +161,13 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
             }
           </tbody>
       </table>
+     </div>
+     </div>
+      
+    <div className="p-6">
+      <BillsTotal bills={bills} today={today}  weekFromToday={weekFromToday}/>
+    </div>
     
-    <BillsTotal bills={bills} today={today}  weekFromToday={weekFromToday}/>
     </>
   )
 }
