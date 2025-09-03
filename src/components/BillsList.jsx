@@ -46,7 +46,7 @@ const BillsList = ({ today, bills }) => {
                 <BillsListCard key={bill.id} bill={bill} />
             ))
         ) : 
-        <p className="font-black text-xl mt-2">No bills to show... Add a bill below.</p>}
+        <p className="font-black text-xl mt-2">No bills to show...</p>}
     </div>
   )
 }

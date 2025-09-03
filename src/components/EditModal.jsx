@@ -100,15 +100,15 @@ const EditModal = ({ bill, onSave, onClose }) => {
             </select>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-2 mt-4">
             <button 
-                className="p-2 cursor-pointer border-2 border-gray-500"
+                className="w-full p-3 cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md text-white"
                 type="submit"
             >
-                submit
+                Submit
             </button>
             <button 
-                className="p-2 cursor-pointer border-2 border-gray-500"
+                className=" w-full p-3 cursor-pointer border-2 border-red-500 hover:bg-gray-300 rounded-md text-red-500"
                 onClick={onClose}
             >
                 Cancel
