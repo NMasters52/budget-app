@@ -104,61 +104,62 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
     }
 
      <BillsFilter filter={filter} setFilter={setFilter} />
-    <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
-      <thead>
-        <tr>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Names</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Cost</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Frequency</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Next Due Date</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Last Paid</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Status</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Mark Paid</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Delete Bill</th>
-          <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Edit Bill</th>
-        </tr>
-      </thead>
-        <tbody>
-          {filteredBills.length > 0 ? (
-            filteredBills.map((bill) => {
-              const status = getBillStatus(bill);
-
-              return (
-                <tr key={bill.id}>
-                <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
-                <td className="text-center px-4 py-2 border border-black">${bill.amount}</td>
-                <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
-                <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.nextDue)}</td>
-                <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.lastPaid)}</td>
-                <td className={`text-center px-4 py-2 border border-black ${status.color}`}>{status.text}</td>
-                <td className="text-center px-4 py-2 border border-black">
-                  <button 
-                    className={`${status.text === 'Paid' ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600 cursor-pointer'}  text-white p-2  shadow-md rounded-md`}
-                    onClick={() => handleMarkPaid(bill.id)}
-                    disabled={status.text === 'Paid'}
-                  >
-                    Mark Paid
-                  </button>
-                </td>
-                <td className="text-center px-4 py-2 border border-black"> <DeleteBills billID={bill.id} bills={bills} setBills={setBills} /> </td>
-                <td className="text-center px-4 py-2 border border-black"> 
-                  <button 
-                    className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer"
-                    onClick={() => openEditModal(bill.id)}
-                  >
-                    Edit Bills
-                  </button>
-                </td>
-              </tr>
-              )
-            })
-          ) :
+      <table className="bg-white table-auto w-max-96 mx-auto border-collapse border border-gray-500">
+        <thead>
           <tr>
-            <td className="p-2">No bills to show. Add a new bill <Link to="/addBill" className={addBillsLinkStyles}>here</Link>.</td>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Names</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Cost</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Frequency</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Next Due Date</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Last Paid</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Bill Status</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Mark Paid</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Delete Bill</th>
+            <th className="text-center px-4 py-2 bg-green-100 border border-gray-500">Edit Bill</th>
           </tr>
-          }
-        </tbody>
-    </table>
+        </thead>
+          <tbody>
+            {filteredBills.length > 0 ? (
+              filteredBills.map((bill) => {
+                const status = getBillStatus(bill);
+
+                return (
+                  <tr key={bill.id}>
+                  <td className="text-center px-4 py-2 border border-black">{bill.title}</td>
+                  <td className="text-center px-4 py-2 border border-black">${bill.amount}</td>
+                  <td className="text-center px-4 py-2 border border-black">{bill.frequency}</td>
+                  <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.nextDue)}</td>
+                  <td className="text-center px-4 py-2 border border-black">{formatedDate(bill.lastPaid)}</td>
+                  <td className={`text-center px-4 py-2 border border-black ${status.color}`}>{status.text}</td>
+                  <td className="text-center px-4 py-2 border border-black">
+                    <button 
+                      className={`${status.text === 'Paid' ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600 cursor-pointer'}  text-white p-2  shadow-md rounded-md`}
+                      onClick={() => handleMarkPaid(bill.id)}
+                      disabled={status.text === 'Paid'}
+                    >
+                      Mark Paid
+                    </button>
+                  </td>
+                  <td className="text-center px-4 py-2 sm:px-3 sm:py-2 border border-black"> <DeleteBills billID={bill.id} bills={bills} setBills={setBills} /> </td>
+                  <td className="text-center px-4 py-2 border border-black"> 
+                    <button 
+                      className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer"
+                      onClick={() => openEditModal(bill.id)}
+                    >
+                      Edit Bills
+                    </button>
+                  </td>
+                </tr>
+                )
+              })
+            ) :
+            <tr>
+              <td className="p-2">No bills to show. Add a new bill <Link to="/addBill" className={addBillsLinkStyles}>here</Link>.</td>
+            </tr>
+            }
+          </tbody>
+      </table>
+    
     <BillsTotal bills={bills} today={today}  weekFromToday={weekFromToday}/>
     </>
   )
