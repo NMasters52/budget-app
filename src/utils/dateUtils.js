@@ -41,11 +41,13 @@ export function isBillPaid(dueDate, todaysDate) {
 }
 
 export const toISODate = (date) => {
-    const y = date.getFullYear()
+    const dateObj = new Date(date);
+
+    const y = dateObj.getFullYear()
   // getMonth() is zero-based; add 1, pad to 2 digits
-  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0')
   // getDate() is the day of month, already local
-  const d = String(date.getDate()).padStart(2, '0')
+  const d = String(dateObj.getDate()).padStart(2, '0')
 
   // Join into “YYYY-MM-DD”
   return `${y}-${m}-${d}`
