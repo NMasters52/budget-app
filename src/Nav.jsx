@@ -21,7 +21,7 @@ const Nav = () => {
     
     <nav className="p-4 bg-green-600 flex flex-row mb-6 justify-between items-center w-full mx-auto">
         <div className="bg-white flex p-2 rounded items-center">
-            <img src="./assets/bill.png" alt="Budget Buddy Mascot" className="h-[50px] mr-2" />
+            <img src="/bill.png" alt="Budget Buddy Mascot" className="h-[50px] mr-2" />
             <h1 className="text-xl font-bold">Bill Buddy</h1>
         </div>
         
