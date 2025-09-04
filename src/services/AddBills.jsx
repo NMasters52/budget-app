@@ -49,8 +49,7 @@ const AddBills = ( { bills, setBills, today } ) => {
         }, 3000);
     }
 
-    console.log(formData);
-
+    console.log(formData, bills)
 
   return (
     <form className=" w-xs sm:w-lg md:w-xl p-4 border-2 border-gray-500 rounded-lg shadow-md mx-auto">

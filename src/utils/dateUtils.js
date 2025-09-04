@@ -40,17 +40,25 @@ export function isBillPaid(dueDate, todaysDate) {
     return false;
 }
 
-export const toISODate = (date) => {
-    const dateObj = new Date(date);
+export const toISODate = dateInput => {
+  let dateObj;
 
-    const y = dateObj.getFullYear()
-  // getMonth() is zero-based; add 1, pad to 2 digits
-  const m = String(dateObj.getMonth() + 1).padStart(2, '0')
-  // getDate() is the day of month, already local
-  const d = String(dateObj.getDate()).padStart(2, '0')
+  if (dateInput instanceof Date) {
+    dateObj = dateInput;
+  } else if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    // parse YYYY-MM-DD as local
+    const [y, m, d] = dateInput.split('-').map(Number);
+    dateObj = new Date(y, m - 1, d);
+  } else {
+    // fallback for timestamps or other formats
+    dateObj = new Date(dateInput);
+  }
 
-  // Join into “YYYY-MM-DD”
-  return `${y}-${m}-${d}`
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+
+  return `${y}-${m}-${d}`;
 };
 
 //helps calculate total bills for the year
