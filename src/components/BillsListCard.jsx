@@ -1,9 +1,9 @@
-import { isBillPaidThisPeriod, formatLocaleDate } from "../utils/dateUtils";
+import { isBillPaidThisPeriod, formatLocaleDate, parseLocalDate } from "../utils/dateUtils";
 
 const BillsListCard = ({ bill }) => {
 
     const getBillStatus = (bill) => {
-        const nextDue = new Date(bill.nextDue);
+        const nextDue = parseLocalDate(bill.nextDue);
         const todaysDate = new Date();
         
         const monthStart = new Date(todaysDate.getFullYear(), todaysDate.getMonth(), 1);

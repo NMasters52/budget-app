@@ -12,12 +12,14 @@ import {
   formatedDate,
   isBillPaidThisPeriod,
   markBillAsPaid,
+  parseLocalDate,
 } from "../utils/dateUtils";
 
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
   const [filter, setFilter] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [billsIDToEdit, setBillsIDToEdit] = useState("");
+  const [latePaymentAlert, setLatePaymentAlert] = useState(null);
 
   const filteredBills = useMemo(() => {
     //useMemo is used here to skip extra rerenders of the shallow array created
@@ -30,9 +32,9 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
         case "descendingPrice":
           return b.amount - a.amount;
         case "ascendingDate":
-          return new Date(a.nextDue).getTime() - new Date(b.nextDue).getTime();
+          return parseLocalDate(a.nextDue).getTime() - parseLocalDate(b.nextDue).getTime();
         case "descendingDate":
-          return new Date(b.nextDue).getTime() - new Date(a.nextDue).getTime();
+          return parseLocalDate(b.nextDue).getTime() - parseLocalDate(a.nextDue).getTime();
         default:
           return 0;
       }
@@ -40,12 +42,33 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
   }, [bills, filter]);
 
   const handleMarkPaid = (billId) => {
+    const bill = bills.find(b => b.id === billId);
+    const todayDate = new Date();
+    const wasLate = bill.nextDue && new Date(bill.nextDue) < todayDate;
+
     const updatedBills = markBillAsPaid(bills, billId);
     setBills(updatedBills);
+
+    // Show alert if payment was late
+    if (wasLate && bill.nextDue) {
+      const paidBill = updatedBills.find(b => b.id === billId);
+      const latestPayment = paidBill?.paymentHistory?.[paidBill.paymentHistory.length - 1];
+
+      if (latestPayment) {
+        setLatePaymentAlert({
+          billName: bill.title,
+          dueDate: formatedDate(bill.nextDue),
+          paidDate: formatedDate(latestPayment.date),
+          daysLate: Math.floor((todayDate - new Date(bill.nextDue)) / (1000 * 60 * 60 * 24))
+        });
+
+        setTimeout(() => setLatePaymentAlert(null), 5000);
+      }
+    }
   };
 
   const getBillStatus = (bill) => {
-    const nextDue = new Date(bill.nextDue);
+    const nextDue = parseLocalDate(bill.nextDue);
     const todaysDate = new Date(today);
 
     const monthStart = new Date(
@@ -60,6 +83,11 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
     );
 
     if (isBillPaidThisPeriod(bill, monthStart, monthEnd)) {
+      // Check if last payment was late
+      const lastPayment = bill.paymentHistory && bill.paymentHistory[bill.paymentHistory.length - 1];
+      if (lastPayment && lastPayment.wasLate) {
+        return { text: "Paid Late", color: "bg-orange-500" };
+      }
       return { text: "Paid", color: "bg-green-500" };
     }
 
@@ -96,6 +124,18 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   return (
     <>
+      {/* Late Payment Alert */}
+      {latePaymentAlert && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+          <p className="font-bold">Late Payment Recorded</p>
+          <p>
+            <strong>{latePaymentAlert.billName}</strong> was paid{" "}
+            <strong>{latePaymentAlert.daysLate} days late</strong>.
+            Due: {latePaymentAlert.dueDate} | Paid: {latePaymentAlert.paidDate}
+          </p>
+        </div>
+      )}
+
       {/* when the edit button is clicked */}
       {isEditModalOpen && billsIDToEdit && (
         <div className="fixed inset-0  z-50">
@@ -103,6 +143,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
             <div className="relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
               <EditModal
                 bill={bill}
+                bills={bills}
                 onClose={() => setIsEditModalOpen(false)}
                 onSave={onEditFormSubmit}
               />
@@ -170,7 +211,7 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
                         {formatedDate(bill.nextDue)}
                       </td>
                       <td className="text-center px-4 py-2 border border-black">
-                        {formatedDate(bill.lastPaid)}
+                        {bill.lastPaid ? formatedDate(bill.lastPaid) : "Never"}
                       </td>
                       <td
                         className={`text-center px-4 py-2 border border-black ${status.color}`}
@@ -178,14 +219,17 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
                         {status.text}
                       </td>
                       <td className="text-center px-4 py-2 border border-black">
+                        {bill.paymentHistory && bill.paymentHistory.some(p => p.wasLate) && (
+                          <span className="text-xs text-orange-600 mr-1">⚠️ Late history</span>
+                        )}
                         <button
                           className={`${
-                            status.text === "Paid"
+                            status.text === "Paid" || status.text === "Paid Late"
                               ? "bg-gray-500"
                               : "bg-green-500 hover:bg-green-600 cursor-pointer"
                           }  text-white p-2  shadow-md rounded-md`}
                           onClick={() => handleMarkPaid(bill.id)}
-                          disabled={status.text === "Paid"}
+                          disabled={status.text === "Paid" || status.text === "Paid Late"}
                         >
                           Mark Paid
                         </button>

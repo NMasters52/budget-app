@@ -4,8 +4,10 @@ const initialBills = [
         title: 'Rent',
         amount: 1800,
         frequency: "monthly",
-        nextDue: "08/23/2025",
-        lastPaid: "08/01/2025",
+        nextDue: "2025-08-23",
+        lastPaid: "2025-08-01",
+        originalDueDate: "2025-08-23",
+        previousDueDate: "2025-08-23",
         paymentHistory: []
     },
     {
@@ -13,17 +15,21 @@ const initialBills = [
         title: 'Grocceries',
         amount: 200,
         frequency: "weekly",
-        nextDue: "08/26/2025",
-        lastPaid: "08/03/2025",
+        nextDue: "2025-08-26",
+        lastPaid: "2025-08-03",
+        originalDueDate: "2025-08-26",
+        previousDueDate: "2025-08-26",
         paymentHistory: []
     },
     {
         id: 3,
         title: 'Dog Food',
         amount: 50,
-        frequency: "bi-weekly",
-        nextDue: "08/28/2025",
-        lastPaid: "08/08/2025",
+        frequency: "biweekly",
+        nextDue: "2025-08-28",
+        lastPaid: "2025-08-08",
+        originalDueDate: "2025-08-28",
+        previousDueDate: "2025-08-28",
         paymentHistory: []
     },
 ];

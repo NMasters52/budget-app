@@ -7,15 +7,41 @@ import BillsList from './components/BillsList'
 import AddBills from './services/AddBills';
 import Nav from './Nav'
 
-//utilities 
-import { addDays } from './utils/dateUtils';
+//utilities
+import { addDays, migrateBills, validateAllBills } from './utils/dateUtils';
 
 
 const App = () => {
 
   const [bills, setBills] = useState(() => {
-    const bills = JSON.parse(localStorage.getItem('bills'));
-    return bills || [];
+    const storedBills = JSON.parse(localStorage.getItem('bills'));
+
+    if (!storedBills) {
+      return [];
+    }
+
+    // Check if bills have already been migrated (have originalDueDate)
+    const isMigrated = storedBills.some(bill => bill.originalDueDate !== undefined);
+
+    if (isMigrated) {
+      // Already migrated, just return
+      return storedBills;
+    }
+
+    // Need to migrate
+    console.log('Migrating bills to include originalDueDate...');
+    const migratedBills = migrateBills(storedBills);
+
+    // Validate migrated bills
+    const validation = validateAllBills(migratedBills);
+    if (!validation.allValid) {
+      console.warn(`Found ${validation.invalidCount} invalid bills after migration`);
+    }
+
+    // Save migrated version
+    localStorage.setItem('bills', JSON.stringify(migratedBills));
+
+    return migratedBills;
   })
 
   useEffect(() => {

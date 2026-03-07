@@ -15,12 +15,27 @@ export function parseLocalDate(dateString) {
   return new Date(y, m - 1, d);
 }
 
-export function formatedDate(dateOrString) {
+export function formatedDate(dateOrString, useLocale = false) {
+  // Handle empty/undefined/null values
+  if (!dateOrString) {
+    return "";
+  }
+
   // ensure we have a Date at local midnight
-  const dt = 
+  const dt =
     typeof dateOrString === 'string'
       ? parseLocalDate(dateOrString)
       : new Date(dateOrString);
+
+  // Additional check for invalid dates
+  if (isNaN(dt.getTime())) {
+    return "";
+  }
+
+  // Use locale format if requested
+  if (useLocale) {
+    return dt.toLocaleDateString();
+  }
 
   const y = dt.getFullYear();
   const m = String(dt.getMonth() + 1).padStart(2, '0');
@@ -30,14 +45,6 @@ export function formatedDate(dateOrString) {
 
 export function formatLocaleDate(date) {
     return new Date(date).toLocaleDateString();
-}
-
-//replced with isBillPaidThisPeriod
-export function isBillPaid(dueDate, todaysDate) {
-    if (dueDate < todaysDate) {
-        return true;
-    }
-    return false;
 }
 
 export const toISODate = dateInput => {
@@ -61,8 +68,44 @@ export const toISODate = dateInput => {
   return `${y}-${m}-${d}`;
 };
 
+// Helper function to get today's date in YYYY-MM-DD format (local time)
+// Used for date input max attributes to prevent selecting future dates
+export const getTodayISODate = () => {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+// Frequency validation
+export const VALID_FREQUENCIES = [
+    'weekly',
+    'biweekly',
+    'monthly',
+    'quartly',
+    'biannually',
+    'yearly'
+];
+
+export const isValidFrequency = (frequency) => {
+    return VALID_FREQUENCIES.includes(frequency);
+};
+
+export const getDefaultFrequency = () => 'monthly';
+
 //helps calculate total bills for the year
 export const calculateYearlyTotal = (bills) => {
+    const invalidBills = bills.filter(bill => !isValidFrequency(bill.frequency));
+
+    if (invalidBills.length > 0) {
+        const names = invalidBills.map(b => b.name || b.title || 'Untitled').join(', ');
+        throw new Error(
+            `Invalid frequency in bills: ${names}. ` +
+            `Valid frequencies are: ${VALID_FREQUENCIES.join(', ')}`
+        );
+    }
+
     return bills.reduce((yearlyTotal, bill) => {
         let annualAmount;
 
@@ -86,12 +129,106 @@ export const calculateYearlyTotal = (bills) => {
              annualAmount = bill.amount * 1;
                 break;
             default:
-                console.warn(`uknown bill frequency ${bill.frequency} in bill: ${bill.name}`);
-             annualAmount = 0;
+                annualAmount = 0;
         }
         return yearlyTotal + annualAmount;
     }, 0);
 }
+
+// Calculate how many periods have passed between two dates based on bill frequency
+const calculatePeriodsPassed = (fromDate, toDate, frequency) => {
+    if (!fromDate || !toDate || !frequency) {
+        console.warn('calculatePeriodsPassed: Missing required parameters');
+        return 0;
+    }
+
+    try {
+        const from = parseLocalDate(fromDate);
+        const to = parseLocalDate(toDate);
+
+        if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+            console.warn('calculatePeriodsPassed: Invalid date provided');
+            return 0;
+        }
+
+        const daysPassed = Math.floor((to - from) / (1000 * 60 * 60 * 24));
+
+        switch (frequency) {
+            case 'weekly':
+                return Math.floor(daysPassed / 7);
+            case 'biweekly':
+                return Math.floor(daysPassed / 14);
+            case 'monthly':
+                // Calculate months passed by comparing year and month
+                const monthsDiff = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+                return monthsDiff;
+            case 'quartly':
+                const quartersDiff = Math.floor(daysPassed / 91); // Approximate quarterly
+                return quartersDiff;
+            case 'biannually':
+                const halfYearsDiff = Math.floor(daysPassed / 182); // Approximate biannually
+                return halfYearsDiff;
+            case 'yearly':
+                return to.getFullYear() - from.getFullYear();
+            default:
+                return 0;
+        }
+    } catch (error) {
+        console.error('calculatePeriodsPassed error:', error);
+        return 0;
+    }
+};
+
+// Calculate next due date from original due date, preserving the day of period
+const calculateNextDueFromDate = (baseDate, periodsToAdd, frequency) => {
+    if (!baseDate || !frequency) {
+        console.warn('calculateNextDueFromDate: Missing required parameters');
+        return baseDate;
+    }
+
+    try {
+        const base = parseLocalDate(baseDate);
+
+        if (isNaN(base.getTime())) {
+            console.warn('calculateNextDueFromDate: Invalid base date');
+            return baseDate;
+        }
+
+        let newDate = new Date(base);
+
+        switch (frequency) {
+            case 'weekly':
+                newDate.setDate(base.getDate() + (periodsToAdd * 7));
+                break;
+            case 'biweekly':
+                newDate.setDate(base.getDate() + (periodsToAdd * 14));
+                break;
+            case 'monthly':
+                // Set the day of month to match the original date
+                const originalDay = base.getDate();
+                newDate = addMonths(base, periodsToAdd);
+                // Preserve the day of month (handle edge case where day might change)
+                newDate.setDate(originalDay);
+                break;
+            case 'quartly':
+                newDate = addMonths(base, periodsToAdd * 3);
+                break;
+            case 'biannually':
+                newDate = addMonths(base, periodsToAdd * 6);
+                break;
+            case 'yearly':
+                newDate = addMonths(base, periodsToAdd * 12);
+                break;
+            default:
+                return baseDate;
+        }
+
+        return newDate;
+    } catch (error) {
+        console.error('calculateNextDueFromDate error:', error);
+        return baseDate;
+    }
+};
 
 //helps check if bill is paid and if so move to bill.paymentHistory
 export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
@@ -99,49 +236,177 @@ export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
 
     return bills.map((bill) => {
         if (bill.id === billId) {
-            let newDueDate;
-            switch (bill.frequency) {
-            case 'weekly':
-                newDueDate = addDays(bill.nextDue, 7);
-                break;
-            case 'biweekly':
-             newDueDate = addDays(bill.nextDue, 14);
-                break;
-            case 'monthly':
-             newDueDate = addMonths(bill.nextDue, 1);
-                break;
-            case 'quartly':
-             newDueDate = addMonths(bill.nextDue, 3);
-                break;
-            case 'biannually':
-             newDueDate = addMonths(bill.nextDue, 6);
-                break;
-            case 'yearly':
-             newDueDate = addMonths(bill.nextDue, 12);
-                break;
-            default:
-                console.warn(`uknown bill frequency ${bill.frequency} in bill: ${bill.title}`);
+            // Validation: Ensure required fields exist
+            if (!bill.nextDue) {
+                console.error(`Bill ${bill.id} (${bill.name || bill.title}) has no nextDue date`);
                 return bill;
             }
 
-            return {
-                ...bill,
-                nextDue: toISODate(newDueDate),
-                lastPaid: paidDateString,
-                paymentHistory: [...bill.paymentHistory, {
-                    date: paidDateString,
-                    amount: bill.amount
-                }]
-            };
+            if (!bill.frequency) {
+                console.error(`Bill ${bill.id} (${bill.name || bill.title}) has no frequency`);
+                return bill;
+            }
+
+            // Use originalDueDate if available, otherwise fall back to nextDue
+            const baseDate = bill.originalDueDate || bill.nextDue;
+
+            if (!baseDate) {
+                console.error(`Bill ${bill.id} has no base date (originalDueDate or nextDue)`);
+                return bill;
+            }
+
+            try {
+                // Calculate how many periods passed from the expected due date to the payment date
+                const periodsPassed = calculatePeriodsPassed(bill.nextDue, paidDate, bill.frequency);
+
+                // Calculate new due date: baseDate + (periodsPassed + 1) periods
+                // This ensures the original day is preserved (e.g., 5th of month)
+                const newDueDate = calculateNextDueFromDate(baseDate, periodsPassed + 1, bill.frequency);
+
+                const wasLate = new Date(paidDateString) > new Date(bill.nextDue);
+                const periodsMissed = wasLate ? periodsPassed : 0;
+
+                return {
+                    ...bill,
+                    nextDue: toISODate(newDueDate),
+                    lastPaid: paidDateString,
+                    originalDueDate: baseDate, // Ensure originalDueDate is set
+                    previousDueDate: bill.nextDue, // Store for revert functionality
+                    paymentHistory: [...(bill.paymentHistory || []), {
+                        date: paidDateString,
+                        amount: bill.amount,
+                        wasLate: wasLate,
+                        periodsMissed: periodsMissed,
+                        originalDueDate: bill.nextDue // Track what the due date was when paid
+                    }]
+                };
+            } catch (error) {
+                console.error(`Error marking bill ${bill.id} as paid:`, error);
+                // Return unchanged bill on error
+                return bill;
+            }
         }
         return bill;
-});
+    });
 };
 
-//helps check if the bill being passed is paid 
+//helps check if the bill being passed is paid
 export const isBillPaidThisPeriod = (bill, periodStart, periodEnd) => {
     if (!bill.lastPaid) return false;
 
     const lastPaid = new Date(bill.lastPaid);
     return lastPaid >= new Date(periodStart) && lastPaid <= new Date(periodEnd);
 }
+
+// Validate bill dates for consistency
+export const validateBillDates = (bill) => {
+  const errors = [];
+
+  if (bill.lastPaid && bill.nextDue) {
+    const lastPaidDate = parseLocalDate(bill.lastPaid);
+    const nextDueDate = parseLocalDate(bill.nextDue);
+
+    // Check if lastPaid is after nextDue (same day is OK - could be paying on the due date)
+    if (lastPaidDate > nextDueDate) {
+      const daysDiff = Math.floor((lastPaidDate - nextDueDate) / (1000 * 60 * 60 * 24));
+      errors.push(
+        `Last paid date (${formatedDate(bill.lastPaid)}) is ${daysDiff} day${daysDiff > 1 ? 's' : ''} after next due date (${formatedDate(bill.nextDue)}). ` +
+        `Please check if these dates are correct.`
+      );
+    }
+
+    // Check if lastPaid is more than 2 years in the past (might be data error)
+    const today = new Date();
+    const twoYearsAgo = new Date(today.getFullYear() - 2, today.getMonth(), today.getDate());
+    if (lastPaidDate < twoYearsAgo) {
+      errors.push(
+        `Last paid date is more than 2 years old. Please verify this is correct.`
+      );
+    }
+
+    // Check if nextDue is more than 5 years in the future (might be data error)
+    const fiveYearsFromNow = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
+    if (nextDueDate > fiveYearsFromNow) {
+      errors.push(
+        `Next due date is more than 5 years in the future. Please verify this is correct.`
+      );
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+// Migrate existing bills to include new fields (originalDueDate, previousDueDate)
+export const migrateBills = (bills) => {
+    return bills.map(bill => {
+        // Basic validation
+        if (!bill || typeof bill !== 'object') {
+            console.warn('Skipping invalid bill during migration');
+            return null;
+        }
+
+        // Ensure basic fields exist
+        const migratedBill = {
+            id: bill.id,
+            title: bill.title || bill.name || 'Untitled',
+            amount: bill.amount || 0,
+            frequency: bill.frequency || 'monthly',
+            nextDue: bill.nextDue || null,
+
+            // Migrate optional fields
+            originalDueDate: bill.originalDueDate || bill.nextDue || null,
+            previousDueDate: bill.previousDueDate || bill.nextDue || null,
+            lastPaid: bill.lastPaid || '',
+
+            // Ensure paymentHistory exists and is valid
+            paymentHistory: (bill.paymentHistory || []).map(entry => ({
+                date: entry.date || entry.date,
+                amount: entry.amount || bill.amount || 0,
+                wasLate: entry.wasLate || false,
+                periodsMissed: entry.periodsMissed || 0,
+                originalDueDate: entry.originalDueDate || entry.date || bill.nextDue || null,
+            })).filter(entry => entry.date), // Remove entries without dates
+        };
+
+        // Validate the migrated bill
+        if (!migratedBill.nextDue) {
+            console.warn(`Bill ${migratedBill.id} (${migratedBill.title}) has no nextDue date`);
+        }
+
+        return migratedBill;
+    }).filter(bill => bill !== null); // Remove any bills that failed migration
+}
+
+// Data integrity check functions
+export const validateBill = (bill) => {
+  const errors = [];
+
+  if (!bill.id) errors.push('Missing id');
+  if (!bill.title && !bill.name) errors.push('Missing title/name');
+  if (bill.amount === undefined || bill.amount === null) errors.push('Missing amount');
+  if (!bill.frequency) errors.push('Missing frequency');
+  if (!bill.nextDue) errors.push('Missing nextDue');
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+export const validateAllBills = (bills) => {
+  const results = bills.map(validateBill);
+  const invalidBills = results.filter(r => !r.isValid);
+
+  if (invalidBills.length > 0) {
+    console.warn('Found invalid bills:', invalidBills);
+  }
+
+  return {
+    allValid: invalidBills.length === 0,
+    invalidCount: invalidBills.length,
+    results
+  };
+};
