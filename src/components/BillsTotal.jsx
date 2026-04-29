@@ -6,9 +6,9 @@ const BillsTotal = ({ bills, today, weekFromToday }) => {
     .filter(
       (bill) =>
         bill.nextDue >= toISODate(today) &&
-        bill.nextDue <= toISODate(weekFromToday)
+        bill.nextDue <= toISODate(weekFromToday),
     )
-    .reduce((acc, bill) => acc + bill.amount, 0);
+    .reduce((acc, bill) => acc + Number(bill.amount), 0);
 
   //all the bills added for the month
   const monthFromToday = addDays(today, 31);
@@ -16,7 +16,7 @@ const BillsTotal = ({ bills, today, weekFromToday }) => {
     .filter(
       (bill) =>
         bill.nextDue >= toISODate(today) &&
-        bill.nextDue <= toISODate(monthFromToday)
+        bill.nextDue <= toISODate(monthFromToday),
     )
     .reduce((acc, bill) => acc + Number(bill.amount), 0);
 

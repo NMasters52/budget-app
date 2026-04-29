@@ -1,10 +1,8 @@
-import React from 'react'
-
-const BillsFilter = ({ filter, setFilter}) => {
+const BillsFilter = ({ filter, setFilter }) => {
   return (
     <div className=" bg-white mb-2 w-[300px] mx-auto flex justify-between border-2 border-gray-500 p-2 rounded-md">
       <h3 className="font-bold text-xl">Filters:</h3>
-      <select 
+      <select
         id="filterBills"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
@@ -17,7 +15,7 @@ const BillsFilter = ({ filter, setFilter}) => {
         <option value="descendingDate">Date: Latest → Earliest</option>
       </select>
     </div>
-  )
-}
+  );
+};
 
-export default BillsFilter
+export default BillsFilter;
