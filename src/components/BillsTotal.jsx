@@ -27,15 +27,15 @@ const BillsTotal = ({ bills, today, weekFromToday }) => {
     <div className="max-w-[600px] border-2 p-2 bg-white border-gray-500 flex flex-col md:flex-row justify-center mx-auto space-x-4 rounded-md mt-2">
       <strong>
         Total this week:
-        <span className=" text-md font-normal">${totalThisWeek}</span>
+        <span className=" text-md font-normal">${totalThisWeek.toFixed(2)}</span>
       </strong>
       <strong>
         Total within 30 days:{" "}
-        <span className="text-md font-normal">${totalThisMonth}</span>
+        <span className="text-md font-normal">${totalThisMonth.toFixed(2)}</span>
       </strong>
       <strong>
         Total this year:{" "}
-        <span className="text-md font-normal">${totalThisYear}</span>
+        <span className="text-md font-normal">${totalThisYear.toFixed(2)}</span>
       </strong>
     </div>
   );

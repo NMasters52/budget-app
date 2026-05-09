@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seed Bills – Budget App</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 820px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    h1 { color: #4ade80; }
+    h2 { margin-top: 2rem; color: #94a3b8; font-size: 1rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: .75rem;
+    }
+    th, td {
+      text-align: left;
+      padding: .5rem .75rem;
+      border-bottom: 1px solid #1e293b;
+    }
+    th { color: #94a3b8; font-weight: 600; }
+    .btn {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: .65rem 1.4rem;
+      background: #4ade80;
+      color: #0f172a;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background: #22c55e; }
+    .btn-secondary {
+      background: transparent;
+      color: #4ade80;
+      border: 1px solid #4ade80;
+      margin-left: .75rem;
+    }
+    .btn-secondary:hover { background: rgba(74,222,128,.1); }
+    .msg { padding: .75rem; border-radius: 6px; margin-top: 1rem; display: none; }
+    .msg.ok  { display: block; background: rgba(74,222,128,.15); color: #4ade80; }
+    .msg.err { display: block; background: rgba(248,113,113,.15); color: #f87171; }
+    .burn { color: #facc15; font-size: 1.15rem; font-weight: 600; margin-top: .5rem; }
+  </style>
+</head>
+<body>
+
+  <h1>🌱 Seed Bills</h1>
+  <p>This will <strong>clear</strong> any existing bills in localStorage and insert 10 realistic household bills with dates calculated relative to <em>right now</em>.</p>
+
+  <button class="btn" id="go">Seed Bills</button>
+  <a class="btn btn-secondary" href="/">← Back to App</a>
+
+  <div class="msg" id="msg"></div>
+  <div id="result" style="display:none">
+    <p class="burn" id="burn"></p>
+    <h2>Seeded Bills</h2>
+    <table>
+      <thead>
+        <tr><th>Title</th><th>Amount</th><th>Frequency</th><th>Next Due</th><th>Last Paid</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+<script>
+const DEFINITIONS = [
+  {
+    "title": "Rent",
+    "amount": 1500,
+    "frequency": "monthly"
+  },
+  {
+    "title": "Groceries",
+    "amount": 120,
+    "frequency": "weekly"
+  },
+  {
+    "title": "Car Payment",
+    "amount": 375,
+    "frequency": "monthly"
+  },
+  {
+    "title": "Electric",
+    "amount": 95,
+    "frequency": "monthly"
+  },
+  {
+    "title": "Internet",
+    "amount": 70,
+    "frequency": "monthly"
+  },
+  {
+    "title": "Water",
+    "amount": 45,
+    "frequency": "quarterly"
+  },
+  {
+    "title": "Car Insurance",
+    "amount": 130,
+    "frequency": "biannually"
+  },
+  {
+    "title": "Gas",
+    "amount": 55,
+    "frequency": "biweekly"
+  },
+  {
+    "title": "Phone Plan",
+    "amount": 85,
+    "frequency": "monthly"
+  },
+  {
+    "title": "Streaming",
+    "amount": 16,
+    "frequency": "monthly"
+  }
+];
+
+const FREQ_DAYS = {
+  weekly: 7, biweekly: 14, monthly: 30,
+  quarterly: 90, biannually: 182, yearly: 365,
+};
+
+const fmt = (d) => d.toISOString().slice(0, 10);
+const addDays = (base, n) => { const d = new Date(base); d.setDate(d.getDate() + n); return d; };
+
+function calcDates(freq) {
+  const cycle = FREQ_DAYS[freq];
+  const offset = 3 + Math.floor(Math.random() * 10);
+  const nextDue = addDays(new Date(), offset);
+  const lastPaid = addDays(nextDue, -cycle);
+  return { nextDue: fmt(nextDue), lastPaid: fmt(lastPaid) };
+}
+
+document.getElementById("go").addEventListener("click", () => {
+  try {
+    const bills = DEFINITIONS.map((def) => {
+      const { nextDue, lastPaid } = calcDates(def.frequency);
+      return {
+        id: crypto.randomUUID(),
+        title: def.title,
+        amount: def.amount,
+        frequency: def.frequency,
+        nextDue,
+        lastPaid,
+        originalDueDate: nextDue,
+        previousDueDate: lastPaid,
+        paymentHistory: [],
+      };
+    });
+
+    localStorage.removeItem("bills");
+    localStorage.setItem("bills", JSON.stringify(bills));
+
+    // estimated monthly burn
+    const monthly = bills.reduce((s, b) => s + (b.amount / FREQ_DAYS[b.frequency]) * 30, 0);
+
+    document.getElementById("burn").textContent =
+      "💰 Estimated monthly burn: $" + monthly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+    for (const b of bills) {
+      tbody.innerHTML += "<tr>" +
+        "<td>" + b.title + "</td>" +
+        "<td>$" + b.amount.toLocaleString() + "</td>" +
+        "<td>" + b.frequency + "</td>" +
+        "<td>" + b.nextDue + "</td>" +
+        "<td>" + b.lastPaid + "</td>" +
+      "</tr>";
+    }
+
+    const msg = document.getElementById("msg");
+    msg.className = "msg ok";
+    msg.textContent = "✅ Seeded " + bills.length + " bills into localStorage(key: bills)";
+    document.getElementById("result").style.display = "block";
+  } catch (err) {
+    const msg = document.getElementById("msg");
+    msg.className = "msg err";
+    msg.textContent = "❌ " + err.message;
+  }
+});
+</script>
+</body>
+</html>
