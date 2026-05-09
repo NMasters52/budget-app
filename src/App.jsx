@@ -58,26 +58,31 @@ const App = () => {
   const weekFromToday = addDays(today, 7);
 
   return (
-    <main className="bg-gray-100 h-screen">
+    <main className="bg-gray-100 min-h-screen flex flex-col">
       <Nav />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <BillsTable
-              bills={bills}
-              setBills={setBills}
-              today={today}
-              weekFromToday={weekFromToday}
-            />
-          }
-        />
-        <Route path="/list" element={<BillsList bills={bills} />} />
-        <Route
-          path="/addBill"
-          element={<AddBills bills={bills} setBills={setBills} />}
-        />
-      </Routes>
+      <div className="flex-1">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <BillsTable
+                bills={bills}
+                setBills={setBills}
+                today={today}
+                weekFromToday={weekFromToday}
+              />
+            }
+          />
+          <Route path="/list" element={<BillsList bills={bills} setBills={setBills} />} />
+          <Route
+            path="/addBill"
+            element={<AddBills bills={bills} setBills={setBills} />}
+          />
+        </Routes>
+      </div>
+      <footer className="bg-green-600 text-white text-center py-4 mt-auto">
+        <p className="text-sm">Bill Buddy &copy; {new Date().getFullYear()}</p>
+      </footer>
     </main>
   );
 };
