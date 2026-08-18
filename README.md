@@ -1,7 +1,7 @@
 # Bill Buddy
 
 A free, lightweight budgeting app built for flexible bill tracking.  
-My wife and I couldn’t find a budgeting tool we loved—so we made our own.  
+My wife and I couldn’t find a budgeting tool we loved. So, we made our own.  
 Add bills, see upcoming due dates, mark them paid, and preview your week’s cash needs.
 
 **Live Demo:** [Bill Buddy on Vercel](https://budget-app-woad-one.vercel.app/)  
