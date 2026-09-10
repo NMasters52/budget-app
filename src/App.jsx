@@ -8,7 +8,12 @@ import AddBills from "./services/AddBills";
 import Nav from "./Nav";
 
 //utilities
-import { addDays, migrateBills, validateAllBills } from "./utils/dateUtils";
+import {
+  addDays,
+  migrateBills,
+  reconcileAllBills,
+  validateAllBills,
+} from "./utils/dateUtils";
 
 const App = () => {
   const [bills, setBills] = useState(() => {
@@ -24,26 +29,32 @@ const App = () => {
         (bill) => bill.originalDueDate !== undefined,
       );
 
-      if (isMigrated) {
-        return storedBills;
+      let loadedBills = storedBills;
+
+      if (!isMigrated) {
+        // Need to migrate
+        console.log("Migrating bills to include originalDueDate...");
+        loadedBills = migrateBills(storedBills);
+
+        // Validate migrated bills
+        const validation = validateAllBills(loadedBills);
+        if (!validation.allValid) {
+          console.warn(
+            `Found ${validation.invalidCount} invalid bills after migration`,
+          );
+        }
       }
 
-      // Need to migrate
-      console.log("Migrating bills to include originalDueDate...");
-      const migratedBills = migrateBills(storedBills);
+      // Bring schedules current: due dates that passed while the user was
+      // away move to unpaidDueDates for review instead of lurking in the past.
+      const reconciledBills = reconcileAllBills(loadedBills);
 
-      // Validate migrated bills
-      const validation = validateAllBills(migratedBills);
-      if (!validation.allValid) {
-        console.warn(
-          `Found ${validation.invalidCount} invalid bills after migration`,
-        );
+      // Save only when something changed
+      if (JSON.stringify(reconciledBills) !== JSON.stringify(storedBills)) {
+        localStorage.setItem("bills", JSON.stringify(reconciledBills));
       }
 
-      // Save migrated version
-      localStorage.setItem("bills", JSON.stringify(migratedBills));
-
-      return migratedBills;
+      return reconciledBills;
     } catch (error) {
       console.error("Error reading bills from localStorage:", error);
       return [];

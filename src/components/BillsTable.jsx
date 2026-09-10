@@ -6,13 +6,16 @@ import DeleteBills from "../services/DeleteBills";
 import BillsTotal from "./BillsTotal";
 import BillsFilter from "./BillsFilter";
 import EditModal from "./EditModal";
+import ReviewModal from "./ReviewModal";
 
 //helper functions
 import {
   formatedDate,
   getBillStatus,
+  getBillsNeedingReview,
   markBillAsPaid,
   parseLocalDate,
+  resolveBillMissedDates,
 } from "../utils/dateUtils";
 
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
@@ -20,6 +23,9 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [billsIDToEdit, setBillsIDToEdit] = useState("");
   const [latePaymentAlert, setLatePaymentAlert] = useState(null);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+
+  const reviewBills = getBillsNeedingReview(bills);
 
   const filteredBills = useMemo(() => {
     //useMemo is used here to skip extra rerenders of the shallow array created
@@ -100,6 +106,15 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
     setIsEditModalOpen(false);
   };
 
+  // Review sheet resolutions: "paid" records history, "skipped" drops dates.
+  const handleResolveMissed = (billId, dates, resolveAs) => {
+    setBills(
+      bills.map((b) =>
+        b.id === billId ? resolveBillMissedDates(b, dates, resolveAs) : b,
+      ),
+    );
+  };
+
   return (
     <>
       {/* Late Payment Alert */}
@@ -117,6 +132,29 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
         </div>
       )}
 
+      {/* Missed-payment review banner */}
+      {reviewBills.length > 0 && (
+        <div
+          className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-4 flex flex-wrap items-center justify-between gap-2"
+          role="alert"
+        >
+          <p>
+            <strong>
+              You have {reviewBills.length} bill
+              {reviewBills.length > 1 ? "s" : ""} to review.
+            </strong>{" "}
+            Some due dates passed while you were away and are still unpaid.
+          </p>
+          <button
+            type="button"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-md cursor-pointer"
+            onClick={() => setIsReviewOpen(true)}
+          >
+            Review
+          </button>
+        </div>
+      )}
+
       {/* when the edit button is clicked */}
       {isEditModalOpen && billsIDToEdit && (
         <div className="fixed inset-0  z-50">
@@ -131,6 +169,15 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Missed-payment review sheet */}
+      {isReviewOpen && reviewBills.length > 0 && (
+        <ReviewModal
+          reviewBills={reviewBills}
+          onResolve={handleResolveMissed}
+          onClose={() => setIsReviewOpen(false)}
+        />
       )}
 
       <div className="p-6">

@@ -280,6 +280,35 @@ export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
       }
 
       try {
+        // Paid before the next due date (e.g. nextDue was pushed ahead by
+        // reconciliation while earlier dates sit in unpaidDueDates):
+        // advance one period from nextDue so the schedule can't rewind.
+        if (paidDateString < bill.nextDue) {
+          const advanced = calculateNextDueFromDate(
+            bill.nextDue,
+            1,
+            bill.frequency,
+          );
+
+          return {
+            ...bill,
+            nextDue: toISODate(advanced),
+            lastPaid: paidDateString,
+            originalDueDate: baseDate,
+            previousDueDate: bill.nextDue,
+            paymentHistory: [
+              ...(bill.paymentHistory || []),
+              {
+                date: paidDateString,
+                amount: bill.amount,
+                wasLate: false,
+                periodsMissed: 0,
+                originalDueDate: bill.nextDue,
+              },
+            ],
+          };
+        }
+
         // Calculate how many periods passed from the expected due date to the payment date
         const periodsPassed = calculatePeriodsPassed(
           bill.nextDue,
@@ -406,6 +435,9 @@ export const migrateBills = (bills) => {
         originalDueDate: bill.originalDueDate || bill.nextDue || null,
         previousDueDate: bill.previousDueDate || bill.nextDue || null,
         lastPaid: bill.lastPaid || "",
+        unpaidDueDates: Array.isArray(bill.unpaidDueDates)
+          ? bill.unpaidDueDates
+          : [],
 
         // Ensure paymentHistory exists and is valid
         paymentHistory: (bill.paymentHistory || [])
@@ -449,6 +481,97 @@ export const validateBill = (bill) => {
   };
 };
 
+// Bring a stale schedule current after time away.
+//
+// Walks the schedule forward one period at a time from nextDue, collects
+// every due date that landed before today into unpaidDueDates, and moves
+// nextDue to the next scheduled date on or after today.
+//
+// Never touches lastPaid or paymentHistory: reconciliation only moves the
+// schedule. Payment status is decided by the user in the review sheet.
+export const reconcileBillOnOpen = (bill, today = new Date()) => {
+  const result = { ...bill, unpaidDueDates: [...(bill.unpaidDueDates || [])] };
+
+  if (!result.nextDue || !isValidFrequency(result.frequency)) {
+    return result;
+  }
+
+  const todayISO = toISODate(today);
+  let nextDue = result.nextDue;
+  const missed = [];
+  // Guard against pathological data (e.g. a nextDue decades in the past).
+  let guard = 0;
+
+  while (parseLocalDate(nextDue) < parseLocalDate(todayISO) && guard < 1000) {
+    missed.push(nextDue);
+    nextDue = toISODate(calculateNextDueFromDate(nextDue, 1, result.frequency));
+    guard += 1;
+  }
+
+  if (missed.length > 0) {
+    result.previousDueDate = result.previousDueDate || missed[0];
+    result.nextDue = nextDue;
+
+    const seen = new Set(result.unpaidDueDates);
+    for (const date of missed) {
+      if (!seen.has(date)) {
+        result.unpaidDueDates.push(date);
+      }
+    }
+    result.unpaidDueDates.sort();
+  }
+
+  return result;
+};
+
+// Reconcile every bill, e.g. right after loading from localStorage.
+export const reconcileAllBills = (bills, today = new Date()) =>
+  bills.map((bill) => reconcileBillOnOpen(bill, today));
+
+// Bills with missed due dates the user has not resolved yet.
+export const getBillsNeedingReview = (bills) =>
+  bills.filter((bill) => (bill.unpaidDueDates?.length ?? 0) > 0);
+
+// Resolve missed due dates from the review sheet.
+//
+// resolveAs "paid": record one paymentHistory entry per date (marked late)
+// and bump lastPaid to the latest resolved date.
+// resolveAs "skipped": drop the dates without recording any payment.
+// nextDue is untouched in both cases: it already points at the next
+// upcoming date after reconciliation.
+export const resolveBillMissedDates = (bill, dates, resolveAs) => {
+  const resolving = new Set(dates);
+  const unpaidDueDates = (bill.unpaidDueDates || []).filter(
+    (date) => !resolving.has(date),
+  );
+
+  if (resolveAs === "skipped") {
+    return { ...bill, unpaidDueDates };
+  }
+
+  const history = dates.map((date) => ({
+    date,
+    amount: bill.amount,
+    wasLate: true,
+    periodsMissed: 1,
+    originalDueDate: date,
+  }));
+
+  const candidates = bill.lastPaid ? [bill.lastPaid, ...dates] : dates;
+  const lastPaid = candidates.reduce((a, b) =>
+    parseLocalDate(a) >= parseLocalDate(b) ? a : b,
+  );
+
+  return {
+    ...bill,
+    unpaidDueDates,
+    lastPaid,
+    paymentHistory: [...(bill.paymentHistory || []), ...history].sort(
+      (a, b) => parseLocalDate(a.date) - parseLocalDate(b.date),
+    ),
+  };
+};
+
 export const validateAllBills = (bills) => {
   const results = bills.map(validateBill);
   const invalidBills = results.filter((r) => !r.isValid);
@@ -479,6 +602,12 @@ export const getBillStatus = (bill, today = null) => {
     todaysDate.getMonth() + 1,
     0,
   );
+
+  // Unresolved missed dates outrank everything, including a lastPaid that
+  // falls in the current month: the bill still needs review.
+  if ((bill.unpaidDueDates?.length ?? 0) > 0) {
+    return "overdue";
+  }
 
   if (isBillPaidThisPeriod(bill, monthStart, monthEnd)) {
     const lastPayment = bill.paymentHistory?.[bill.paymentHistory.length - 1];

@@ -128,6 +128,31 @@ describe("markBillAsPaid", () => {
     expect(updated.paymentHistory[0].periodsMissed).toBe(2);
   });
 
+  test("paying today while nextDue is still ahead advances one cycle, never rewinds", () => {
+    // After reconciliation nextDue can sit in the future (Oct 5) while
+    // earlier missed dates are still unresolved. Paying today (Sep 10)
+    // must move the schedule forward from Oct 5 to Nov 5, not recompute
+    // from the anchor and land in the past.
+    const bills = [
+      {
+        id: "water",
+        title: "Water",
+        amount: 45,
+        frequency: "monthly",
+        nextDue: "2026-10-05",
+        originalDueDate: "2026-08-05",
+        unpaidDueDates: ["2026-08-05", "2026-09-05"],
+        paymentHistory: [],
+      },
+    ];
+    const [updated] = markBillAsPaid(bills, "water", new Date(2026, 8, 10));
+
+    expect(updated.lastPaid).toBe("2026-09-10");
+    expect(updated.nextDue).toBe("2026-11-05");
+    expect(updated.paymentHistory[0].wasLate).toBe(false);
+    expect(updated.unpaidDueDates).toEqual(["2026-08-05", "2026-09-05"]);
+  });
+
   test("leaves other bills untouched", () => {
     const bills = [
       { id: "a", title: "A", amount: 1, frequency: "monthly", nextDue: "2026-09-10" },
