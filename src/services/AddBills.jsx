@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  toISODate,
   getTodayISODate,
-  isValidFrequency,
   calculateNextDueFromFrequency,
-  validateBillDates,
+  reconcileBillOnOpen,
+  validateBillInput,
 } from "../utils/dateUtils";
 import FrequencySelect from "../components/FrequencySelect";
 
-const AddBills = ({ bills, setBills }) => {
+const AddBills = ({ setBills }) => {
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -49,44 +49,36 @@ const AddBills = ({ bills, setBills }) => {
     }
 
     setFormData(updatedFormData);
+    setError("");
   };
 
   const submitNewBill = (e) => {
     e.preventDefault();
 
-    // Validate frequency
-    if (!isValidFrequency(formData.frequency)) {
-      alert("Invalid frequency selected. Please choose a valid option.");
-      return;
-    }
-
-    // Validate dates
-    const tempBill = {
+    const inputBill = {
       ...formData,
-      amount: parseFloat(formData.amount),
-      nextDue: toISODate(formData.nextDue),
-      lastPaid: toISODate(formData.lastPaid),
+      title: formData.title.trim(),
+      amount: formData.amount,
+      lastPaid: formData.lastPaid || "",
     };
-    const dateValidation = validateBillDates(tempBill);
+    const validation = validateBillInput(inputBill);
 
-    if (!dateValidation.isValid) {
-      if (confirm(dateValidation.errors.join("\n\n"))) {
-        // User confirmed, proceed anyway
-      } else {
-        return;
-      }
+    if (!validation.isValid) {
+      setError(validation.errors.join(" "));
+      setSuccess(false);
+      return;
     }
 
     const newBill = {
       id: uuidv4(),
-      ...formData,
-      amount: parseFloat(formData.amount),
-      nextDue: toISODate(formData.nextDue),
-      lastPaid: toISODate(formData.lastPaid),
-      originalDueDate: toISODate(formData.nextDue),
-      previousDueDate: toISODate(formData.nextDue),
+      ...inputBill,
+      amount: Number(inputBill.amount),
+      originalDueDate: inputBill.nextDue,
+      previousDueDate: inputBill.nextDue,
+      unpaidDueDates: [],
     };
-    setBills([...bills, newBill]);
+    const reconciledBill = reconcileBillOnOpen(newBill);
+    setBills((currentBills) => [...currentBills, reconciledBill]);
     setFormData({
       title: "",
       amount: 0,
@@ -96,6 +88,7 @@ const AddBills = ({ bills, setBills }) => {
       paymentHistory: [],
       autoCalculateDue: true,
     });
+    setError("");
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
@@ -103,8 +96,20 @@ const AddBills = ({ bills, setBills }) => {
   };
 
   return (
-    <form className="w-xs sm:w-lg md:w-xl p-4 border-2 border-gray-500 rounded-lg shadow-md mx-auto">
+    <form
+      className="w-xs sm:w-lg md:w-xl p-4 border-2 border-gray-500 rounded-lg shadow-md mx-auto"
+      onSubmit={submitNewBill}
+    >
       <h3 className="mb-4 p-2 font-bold text-2xl">Add New Bill</h3>
+
+      {error && (
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+          role="alert"
+        >
+          {error}
+        </div>
+      )}
 
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -119,6 +124,7 @@ const AddBills = ({ bills, setBills }) => {
         <input
           type="text"
           name="title"
+          required
           value={formData.title}
           placeholder="Rent"
           onChange={(e) => handleChange(e)}
@@ -133,6 +139,10 @@ const AddBills = ({ bills, setBills }) => {
         <input
           type="number"
           name="amount"
+          required
+          min="0.01"
+          step="0.01"
+          inputMode="decimal"
           value={formData.amount}
           onChange={(e) => handleChange(e)}
           onWheel={(e) => e.target.blur()}
@@ -147,6 +157,7 @@ const AddBills = ({ bills, setBills }) => {
         <input
           type="date"
           name="nextDue"
+          required
           value={formData.nextDue}
           onChange={(e) => handleChange(e)}
           className="w-full border-2 border-black rounded-sm p-2"
@@ -210,7 +221,7 @@ const AddBills = ({ bills, setBills }) => {
       </div>
 
       <button
-        onClick={submitNewBill}
+        type="submit"
         className="bg-blue-600 hover:bg-blue-300 cursor-pointer w-full shadow-md rounded-lg text-white p-2"
       >
         Add New Bill

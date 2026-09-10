@@ -10,10 +10,12 @@
 import { describe, test, expect } from "vitest";
 import {
   toISODate,
+  isValidISODate,
   parseLocalDate,
   formatedDate,
   calculateYearlyTotal,
   isValidFrequency,
+  validateBillInput,
   markBillAsPaid,
   getBillStatus,
 } from "./dateUtils";
@@ -26,6 +28,20 @@ describe("toISODate", () => {
 
   test("passes an existing YYYY-MM-DD string through unchanged", () => {
     expect(toISODate("2026-09-10")).toBe("2026-09-10");
+  });
+
+  test("returns an empty string for an empty date", () => {
+    expect(toISODate("")).toBe("");
+  });
+});
+
+describe("isValidISODate", () => {
+  test("accepts real calendar dates", () => {
+    expect(isValidISODate("2026-09-10")).toBe(true);
+  });
+
+  test("rejects impossible calendar dates", () => {
+    expect(isValidISODate("2026-02-29")).toBe(false);
   });
 });
 
@@ -82,6 +98,59 @@ describe("isValidFrequency", () => {
 
   test("rejects made-up frequencies", () => {
     expect(isValidFrequency("sometimes")).toBe(false);
+  });
+});
+
+describe("validateBillInput", () => {
+  const validBill = {
+    title: "Gym",
+    amount: "30.00",
+    frequency: "monthly",
+    nextDue: "2026-07-09",
+    lastPaid: "",
+  };
+  const today = new Date(2026, 8, 10);
+
+  test("accepts a valid bill with a past next due date", () => {
+    expect(validateBillInput(validBill, today)).toEqual({
+      isValid: true,
+      errors: [],
+    });
+  });
+
+  test("rejects blank, zero, negative, non-finite, and over-precise amounts", () => {
+    for (const amount of ["", "0", "-5", "1e309", "12.345"]) {
+      const result = validateBillInput({ ...validBill, amount }, today);
+      expect(result.isValid, amount).toBe(false);
+      expect(result.errors).toContain("Bill amount must be greater than zero and use at most two decimal places.");
+    }
+  });
+
+  test("rejects missing or invalid dates", () => {
+    const missing = validateBillInput({ ...validBill, nextDue: "" }, today);
+    const invalid = validateBillInput(
+      { ...validBill, nextDue: "2026-02-29" },
+      today,
+    );
+
+    expect(missing.errors).toContain("Next billing date is required.");
+    expect(invalid.errors).toContain("Next billing date must be a valid date.");
+  });
+
+  test("rejects a future last-paid date and a last-paid date after next due", () => {
+    const future = validateBillInput(
+      { ...validBill, lastPaid: "2026-09-11" },
+      today,
+    );
+    const inconsistent = validateBillInput(
+      { ...validBill, nextDue: "2026-08-01", lastPaid: "2026-08-02" },
+      today,
+    );
+
+    expect(future.errors).toContain("Last paid date cannot be in the future.");
+    expect(inconsistent.errors).toContain(
+      "Last paid date cannot be after the next billing date.",
+    );
   });
 });
 

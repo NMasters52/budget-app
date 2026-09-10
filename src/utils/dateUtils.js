@@ -53,6 +53,10 @@ export function formatLocaleDate(date) {
 }
 
 export const toISODate = (dateInput) => {
+  if (dateInput === "" || dateInput === null || dateInput === undefined) {
+    return "";
+  }
+
   let dateObj;
 
   if (dateInput instanceof Date) {
@@ -69,11 +73,27 @@ export const toISODate = (dateInput) => {
     dateObj = new Date(dateInput);
   }
 
+  if (Number.isNaN(dateObj.getTime())) {
+    return "";
+  }
+
   const y = dateObj.getFullYear();
   const m = String(dateObj.getMonth() + 1).padStart(2, "0");
   const d = String(dateObj.getDate()).padStart(2, "0");
 
   return `${y}-${m}-${d}`;
+};
+
+export const isValidISODate = (dateString) => {
+  if (
+    typeof dateString !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(dateString)
+  ) {
+    return false;
+  }
+
+  const date = parseLocalDate(dateString);
+  return !Number.isNaN(date.getTime()) && toISODate(date) === dateString;
 };
 
 // Helper function to get today's date in YYYY-MM-DD format (local time)
@@ -101,6 +121,67 @@ export const isValidFrequency = (frequency) => {
 };
 
 export const getDefaultFrequency = () => "monthly";
+
+export const validateBillInput = (bill, today = new Date()) => {
+  const errors = [];
+  const title = typeof bill.title === "string" ? bill.title.trim() : "";
+  const amountText = String(bill.amount ?? "").trim();
+  const amount = Number(amountText);
+  const hasValidAmountFormat = /^(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/.test(
+    amountText,
+  );
+
+  if (!title) {
+    errors.push("Bill title is required.");
+  }
+
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0 ||
+    !hasValidAmountFormat
+  ) {
+    errors.push(
+      "Bill amount must be greater than zero and use at most two decimal places.",
+    );
+  }
+
+  if (!isValidFrequency(bill.frequency)) {
+    errors.push("Bill frequency is invalid.");
+  }
+
+  const hasValidNextDue = isValidISODate(bill.nextDue);
+  if (!bill.nextDue) {
+    errors.push("Next billing date is required.");
+  } else if (!hasValidNextDue) {
+    errors.push("Next billing date must be a valid date.");
+  }
+
+  const hasLastPaid =
+    bill.lastPaid !== "" &&
+    bill.lastPaid !== null &&
+    bill.lastPaid !== undefined;
+  const hasValidLastPaid = !hasLastPaid || isValidISODate(bill.lastPaid);
+  if (hasLastPaid && !hasValidLastPaid) {
+    errors.push("Last paid date must be a valid date.");
+  }
+
+  if (hasValidLastPaid && hasLastPaid) {
+    const todayISO = toISODate(today);
+
+    if (bill.lastPaid > todayISO) {
+      errors.push("Last paid date cannot be in the future.");
+    }
+
+    if (hasValidNextDue && bill.lastPaid > bill.nextDue) {
+      errors.push("Last paid date cannot be after the next billing date.");
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
 
 //helps calculate total bills for the year
 export const calculateYearlyTotal = (bills) => {
