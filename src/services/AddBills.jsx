@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   toISODate,
@@ -23,29 +23,33 @@ const AddBills = ({ bills, setBills }) => {
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
 
-  // Auto-calculate nextDue when lastPaid changes and autoCalculateDue is true
-  useEffect(() => {
-    if (formData.autoCalculateDue && formData.lastPaid && formData.frequency) {
+    const updatedFormData = {
+      ...formData,
+      [name]: newValue,
+    };
+
+    // Auto-calculate nextDue when lastPaid or frequency changes and autoCalculateDue is true
+    if (
+      formData.autoCalculateDue &&
+      (name === "lastPaid" || name === "frequency") &&
+      updatedFormData.lastPaid &&
+      updatedFormData.frequency
+    ) {
       try {
-        const nextDue = calculateNextDueFromFrequency(
-          formData.lastPaid,
-          formData.frequency,
+        updatedFormData.nextDue = calculateNextDueFromFrequency(
+          updatedFormData.lastPaid,
+          updatedFormData.frequency,
         );
-        setFormData((prev) => ({
-          ...prev,
-          nextDue,
-        }));
       } catch (error) {
         console.error("Error auto-calculating nextDue:", error);
       }
     }
-  }, [formData.lastPaid, formData.frequency, formData.autoCalculateDue]);
+
+    setFormData(updatedFormData);
+  };
 
   const submitNewBill = (e) => {
     e.preventDefault();
