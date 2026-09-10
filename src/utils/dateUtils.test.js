@@ -1,0 +1,156 @@
+// Tests for dateUtils.js
+//
+// Each `test(...)` call is one check. Inside every check you:
+//   1. call a real function from dateUtils.js with an input you chose,
+//   2. assert the output equals the answer you expect.
+//
+// Run them all with:  npm test
+// Vitest finds every file ending in .test.js and reports green or red.
+
+import { describe, test, expect } from "vitest";
+import {
+  toISODate,
+  parseLocalDate,
+  formatedDate,
+  calculateYearlyTotal,
+  isValidFrequency,
+  markBillAsPaid,
+  getBillStatus,
+} from "./dateUtils";
+
+describe("toISODate", () => {
+  test("converts a Date object to a YYYY-MM-DD string", () => {
+    // Months are 0-indexed: 8 means September.
+    expect(toISODate(new Date(2026, 8, 10))).toBe("2026-09-10");
+  });
+
+  test("passes an existing YYYY-MM-DD string through unchanged", () => {
+    expect(toISODate("2026-09-10")).toBe("2026-09-10");
+  });
+});
+
+describe("parseLocalDate", () => {
+  test("parses YYYY-MM-DD as local midnight, not UTC", () => {
+    const d = parseLocalDate("2026-09-10");
+    // If this used new Date("2026-09-10") it would be UTC midnight,
+    // which is the previous day in US timezones.
+    expect(d.getFullYear()).toBe(2026);
+    expect(d.getMonth()).toBe(8); // 0-indexed: September
+    expect(d.getDate()).toBe(10);
+  });
+});
+
+describe("formatedDate", () => {
+  test("formats a YYYY-MM-DD string as MM/DD/YYYY", () => {
+    expect(formatedDate("2026-09-10")).toBe("09/10/2026");
+  });
+
+  test("returns an empty string for missing input", () => {
+    expect(formatedDate("")).toBe("");
+    expect(formatedDate(null)).toBe("");
+  });
+});
+
+describe("calculateYearlyTotal", () => {
+  test("annualizes each bill by its frequency and sums", () => {
+    const bills = [
+      { name: "Rent", amount: 100, frequency: "monthly" }, // 100 * 12
+      { name: "Insurance", amount: 1200, frequency: "yearly" }, // 1200 * 1
+    ];
+    expect(calculateYearlyTotal(bills)).toBe(2400);
+  });
+
+  test("throws and names the offending bill when a frequency is invalid", () => {
+    const bills = [{ name: "Mystery Bill", amount: 10, frequency: "sometimes" }];
+    expect(() => calculateYearlyTotal(bills)).toThrow(/Mystery Bill/);
+  });
+});
+
+describe("isValidFrequency", () => {
+  test("accepts every supported frequency", () => {
+    for (const f of [
+      "weekly",
+      "biweekly",
+      "monthly",
+      "quarterly",
+      "biannually",
+      "yearly",
+    ]) {
+      expect(isValidFrequency(f)).toBe(true);
+    }
+  });
+
+  test("rejects made-up frequencies", () => {
+    expect(isValidFrequency("sometimes")).toBe(false);
+  });
+});
+
+describe("markBillAsPaid", () => {
+  test("paid on the due date: advances exactly one period, not late", () => {
+    const bills = [
+      {
+        id: "gym",
+        title: "Gym",
+        amount: 30,
+        frequency: "monthly",
+        nextDue: "2026-09-10",
+        originalDueDate: "2026-09-10",
+        paymentHistory: [],
+      },
+    ];
+    const [updated] = markBillAsPaid(bills, "gym", new Date(2026, 8, 10));
+
+    expect(updated.lastPaid).toBe("2026-09-10");
+    expect(updated.nextDue).toBe("2026-10-10");
+    expect(updated.paymentHistory).toHaveLength(1);
+    expect(updated.paymentHistory[0].wasLate).toBe(false);
+  });
+
+  test("paid two months late: records 2 missed periods and skips ahead 3", () => {
+    // Due July 9, paid September 9. The schedule must jump to October 9
+    // (not August 9) and history must record two missed periods.
+    const bills = [
+      {
+        id: "gym",
+        title: "Gym",
+        amount: 30,
+        frequency: "monthly",
+        nextDue: "2026-07-09",
+        originalDueDate: "2026-07-09",
+        paymentHistory: [],
+      },
+    ];
+    const [updated] = markBillAsPaid(bills, "gym", new Date(2026, 8, 9));
+
+    expect(updated.lastPaid).toBe("2026-09-09");
+    expect(updated.nextDue).toBe("2026-10-09");
+    expect(updated.paymentHistory[0].wasLate).toBe(true);
+    expect(updated.paymentHistory[0].periodsMissed).toBe(2);
+  });
+
+  test("leaves other bills untouched", () => {
+    const bills = [
+      { id: "a", title: "A", amount: 1, frequency: "monthly", nextDue: "2026-09-10" },
+      { id: "b", title: "B", amount: 2, frequency: "monthly", nextDue: "2026-09-11" },
+    ];
+    const [, b] = markBillAsPaid(bills, "a", new Date(2026, 8, 10));
+    expect(b.nextDue).toBe("2026-09-11");
+    expect(b.paymentHistory).toBeUndefined();
+  });
+});
+
+describe("getBillStatus", () => {
+  test("overdue when nextDue is in the past and never paid", () => {
+    const bill = { nextDue: "2026-01-15", lastPaid: "" };
+    expect(getBillStatus(bill, new Date(2026, 8, 10))).toBe("overdue");
+  });
+
+  test("paid when lastPaid falls inside the current month", () => {
+    const bill = {
+      nextDue: "2026-10-10",
+      lastPaid: "2026-09-05",
+      paymentHistory: [{ wasLate: false }],
+    };
+    expect(getBillStatus(bill, new Date(2026, 8, 15))).toBe("paid");
+  });
+});

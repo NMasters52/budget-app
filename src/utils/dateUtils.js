@@ -283,7 +283,7 @@ export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
         // Calculate how many periods passed from the expected due date to the payment date
         const periodsPassed = calculatePeriodsPassed(
           bill.nextDue,
-          paidDate,
+          paidDateString,
           bill.frequency,
         );
 
