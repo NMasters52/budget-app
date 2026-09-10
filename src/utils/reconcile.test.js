@@ -10,6 +10,7 @@ import { describe, test, expect } from "vitest";
 import {
   reconcileBillOnOpen,
   reconcileAllBills,
+  resolveBillMissedDatesInList,
   resolveBillMissedDates,
   getBillsNeedingReview,
   getBillStatus,
@@ -83,6 +84,19 @@ describe("reconcileBillOnOpen", () => {
 
     expect(bill.nextDue).toBe("2026-03-30");
     expect(bill.unpaidDueDates).toEqual(["2026-01-30"]);
+  });
+
+  test("uses originalDueDate as the recurrence anchor when nextDue drifted", () => {
+    const bill = reconcileBillOnOpen(
+      makeBill({
+        nextDue: "2026-02-06",
+        originalDueDate: "2026-01-05",
+      }),
+      new Date(2026, 2, 1), // March 1
+    );
+
+    expect(bill.nextDue).toBe("2026-03-05");
+    expect(bill.unpaidDueDates).toEqual(["2026-02-06"]);
   });
 
   test("running it twice changes nothing (idempotent)", () => {
@@ -178,5 +192,32 @@ describe("review helpers", () => {
 
     expect(bill.unpaidDueDates.length).toBeGreaterThan(0);
     expect(getBillStatus(bill, TODAY)).toBe("overdue");
+  });
+
+  test("list resolution preserves every bill in a bulk-style update", () => {
+    const bills = reconcileAllBills(
+      [
+        makeBill({ id: "a" }),
+        makeBill({ id: "b", nextDue: "2026-08-01", originalDueDate: "2026-08-01" }),
+      ],
+      TODAY,
+    );
+
+    const afterFirst = resolveBillMissedDatesInList(
+      bills,
+      "a",
+      bills[0].unpaidDueDates,
+      "skipped",
+    );
+    const afterSecond = resolveBillMissedDatesInList(
+      afterFirst,
+      "b",
+      afterFirst[1].unpaidDueDates,
+      "skipped",
+    );
+
+    expect(afterSecond.every((bill) => bill.unpaidDueDates.length === 0)).toBe(
+      true,
+    );
   });
 });

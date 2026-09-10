@@ -248,6 +248,35 @@ const calculateNextDueFromDate = (baseDate, periodsToAdd, frequency) => {
   }
 };
 
+// Find the first recurrence after the current due date while preserving the
+// original schedule anchor. This keeps a drifted saved date from changing the
+// bill's recurrence day during reconciliation.
+const calculateNextAnchoredDueDate = (
+  currentDueDate,
+  originalDueDate,
+  frequency,
+) => {
+  if (currentDueDate < originalDueDate) {
+    return originalDueDate;
+  }
+
+  let periods = 1;
+  let candidate = toISODate(
+    calculateNextDueFromDate(originalDueDate, periods, frequency),
+  );
+  let guard = 0;
+
+  while (candidate <= currentDueDate && guard < 1000) {
+    periods += 1;
+    candidate = toISODate(
+      calculateNextDueFromDate(originalDueDate, periods, frequency),
+    );
+    guard += 1;
+  }
+
+  return candidate;
+};
+
 //helps check if bill is paid and if so move to bill.paymentHistory
 export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
   const paidDateString = toISODate(paidDate);
@@ -324,7 +353,8 @@ export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
           bill.frequency,
         );
 
-        const wasLate = new Date(paidDateString) > new Date(bill.nextDue);
+        const wasLate =
+          parseLocalDate(paidDateString) > parseLocalDate(bill.nextDue);
         const periodsMissed = wasLate ? periodsPassed : 0;
 
         return {
@@ -483,9 +513,9 @@ export const validateBill = (bill) => {
 
 // Bring a stale schedule current after time away.
 //
-// Walks the schedule forward one period at a time from nextDue, collects
-// every due date that landed before today into unpaidDueDates, and moves
-// nextDue to the next scheduled date on or after today.
+// Walks the schedule forward one period at a time from nextDue, derives each
+// next date from originalDueDate, collects past dates into unpaidDueDates, and
+// moves nextDue to the next scheduled date on or after today.
 //
 // Never touches lastPaid or paymentHistory: reconciliation only moves the
 // schedule. Payment status is decided by the user in the review sheet.
@@ -497,6 +527,7 @@ export const reconcileBillOnOpen = (bill, today = new Date()) => {
   }
 
   const todayISO = toISODate(today);
+  const originalDueDate = result.originalDueDate || result.nextDue;
   let nextDue = result.nextDue;
   const missed = [];
   // Guard against pathological data (e.g. a nextDue decades in the past).
@@ -504,7 +535,11 @@ export const reconcileBillOnOpen = (bill, today = new Date()) => {
 
   while (parseLocalDate(nextDue) < parseLocalDate(todayISO) && guard < 1000) {
     missed.push(nextDue);
-    nextDue = toISODate(calculateNextDueFromDate(nextDue, 1, result.frequency));
+    nextDue = calculateNextAnchoredDueDate(
+      nextDue,
+      originalDueDate,
+      result.frequency,
+    );
     guard += 1;
   }
 
@@ -571,6 +606,20 @@ export const resolveBillMissedDates = (bill, dates, resolveAs) => {
     ),
   };
 };
+
+// Apply one missed-date resolution to the current bill list. Keeping this
+// list update pure lets React queue several bulk resolutions safely.
+export const resolveBillMissedDatesInList = (
+  bills,
+  billId,
+  dates,
+  resolveAs,
+) =>
+  bills.map((bill) =>
+    bill.id === billId
+      ? resolveBillMissedDates(bill, dates, resolveAs)
+      : bill,
+  );
 
 export const validateAllBills = (bills) => {
   const results = bills.map(validateBill);

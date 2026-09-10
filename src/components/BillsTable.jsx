@@ -15,7 +15,7 @@ import {
   getBillsNeedingReview,
   markBillAsPaid,
   parseLocalDate,
-  resolveBillMissedDates,
+  resolveBillMissedDatesInList,
   toISODate,
 } from "../utils/dateUtils";
 
@@ -57,9 +57,11 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
   const handleMarkPaid = (billId) => {
     const bill = bills.find((b) => b.id === billId);
     const todayDate = new Date();
+    const todayCalendarDate = parseLocalDate(toISODate(todayDate));
     // Date-only compare, matching how markBillAsPaid records wasLate:
     // paying on the due date is on time, not late.
-    const wasLate = bill.nextDue && toISODate(todayDate) > bill.nextDue;
+    const wasLate =
+      bill.nextDue && todayCalendarDate > parseLocalDate(bill.nextDue);
 
     const updatedBills = markBillAsPaid(bills, billId);
     setBills(updatedBills);
@@ -76,7 +78,8 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
           dueDate: formatedDate(bill.nextDue),
           paidDate: formatedDate(latestPayment.date),
           daysLate: Math.floor(
-            (todayDate - new Date(bill.nextDue)) / (1000 * 60 * 60 * 24),
+            (todayCalendarDate - parseLocalDate(bill.nextDue)) /
+              (1000 * 60 * 60 * 24),
           ),
         });
 
@@ -111,10 +114,8 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
 
   // Review sheet resolutions: "paid" records history, "skipped" drops dates.
   const handleResolveMissed = (billId, dates, resolveAs) => {
-    setBills(
-      bills.map((b) =>
-        b.id === billId ? resolveBillMissedDates(b, dates, resolveAs) : b,
-      ),
+    setBills((currentBills) =>
+      resolveBillMissedDatesInList(currentBills, billId, dates, resolveAs),
     );
   };
 
