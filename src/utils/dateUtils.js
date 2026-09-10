@@ -589,7 +589,14 @@ export const validateAllBills = (bills) => {
 
 // Shared bill status calculation — returns one of: 'paid', 'paid_late', 'overdue', 'due_soon', 'pending'
 export const getBillStatus = (bill, today = null) => {
-  const todaysDate = today ? new Date(today) : new Date();
+  const rawToday = today ? new Date(today) : new Date();
+  // Compare calendar dates, not timestamps: a bill due today must not look
+  // overdue just because "now" is 3pm and its due date is local midnight.
+  const todaysDate = new Date(
+    rawToday.getFullYear(),
+    rawToday.getMonth(),
+    rawToday.getDate(),
+  );
   const nextDue = parseLocalDate(bill.nextDue);
 
   const monthStart = new Date(

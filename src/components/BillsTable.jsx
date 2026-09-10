@@ -16,6 +16,7 @@ import {
   markBillAsPaid,
   parseLocalDate,
   resolveBillMissedDates,
+  toISODate,
 } from "../utils/dateUtils";
 
 const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
@@ -56,7 +57,9 @@ const BillsTable = ({ bills = [], setBills, today, weekFromToday }) => {
   const handleMarkPaid = (billId) => {
     const bill = bills.find((b) => b.id === billId);
     const todayDate = new Date();
-    const wasLate = bill.nextDue && new Date(bill.nextDue) < todayDate;
+    // Date-only compare, matching how markBillAsPaid records wasLate:
+    // paying on the due date is on time, not late.
+    const wasLate = bill.nextDue && toISODate(todayDate) > bill.nextDue;
 
     const updatedBills = markBillAsPaid(bills, billId);
     setBills(updatedBills);

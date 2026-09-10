@@ -178,4 +178,19 @@ describe("getBillStatus", () => {
     };
     expect(getBillStatus(bill, new Date(2026, 8, 15))).toBe("paid");
   });
+
+  test("a bill due today is due_soon, not overdue, even when checked mid-day", () => {
+    // 3:30pm on the due date: the old code compared local midnight (the due
+    // date) against 3:30pm (now) and called the bill overdue.
+    const bill = { nextDue: "2026-09-10", lastPaid: "" };
+    expect(getBillStatus(bill, new Date(2026, 8, 10, 15, 30))).toBe("due_soon");
+  });
+
+  test("the due_soon window covers 7 calendar days, then it is pending", () => {
+    const thisWeek = { nextDue: "2026-09-17", lastPaid: "" };
+    expect(getBillStatus(thisWeek, new Date(2026, 8, 10, 15, 30))).toBe("due_soon");
+
+    const nextWeek = { nextDue: "2026-09-18", lastPaid: "" };
+    expect(getBillStatus(nextWeek, new Date(2026, 8, 10, 15, 30))).toBe("pending");
+  });
 });
