@@ -48,6 +48,7 @@
       margin-left: .75rem;
     }
     .btn-secondary:hover { background: rgba(74,222,128,.1); }
+    .local-note { color: #94a3b8; font-size: .9rem; margin-top: 1rem; }
     .msg { padding: .75rem; border-radius: 6px; margin-top: 1rem; display: none; }
     .msg.ok  { display: block; background: rgba(74,222,128,.15); color: #4ade80; }
     .msg.err { display: block; background: rgba(248,113,113,.15); color: #f87171; }
@@ -60,7 +61,9 @@
   <p>This will <strong>clear</strong> any existing bills in localStorage and insert 10 realistic household bills with dates calculated relative to <em>right now</em>.</p>
 
   <button class="btn" id="go">Seed Bills</button>
+  <a class="btn btn-secondary" href="/seed-debts.html">Seed Debts</a>
   <a class="btn btn-secondary" href="/">← Back to App</a>
+  <p class="local-note">Debt seeding opens the local-only page so personal debt values stay out of the tracked bill seeder.</p>
 
   <div class="msg" id="msg"></div>
   <div id="result" style="display:none">

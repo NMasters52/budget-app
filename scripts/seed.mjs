@@ -4,7 +4,8 @@
  * seed.mjs
  *
  * Generates public/seed.html — a self-contained page that writes 10 realistic
- * household bills into localStorage under the key "bills".
+ * household bills into localStorage under the key "bills" and links to the
+ * local-only debt seeder.
  *
  * Run:  npm run seed
  * Then: open http://localhost:5173/seed.html   (dev server must be running)
@@ -84,6 +85,7 @@ const html = `<!DOCTYPE html>
       margin-left: .75rem;
     }
     .btn-secondary:hover { background: rgba(74,222,128,.1); }
+    .local-note { color: #94a3b8; font-size: .9rem; margin-top: 1rem; }
     .msg { padding: .75rem; border-radius: 6px; margin-top: 1rem; display: none; }
     .msg.ok  { display: block; background: rgba(74,222,128,.15); color: #4ade80; }
     .msg.err { display: block; background: rgba(248,113,113,.15); color: #f87171; }
@@ -96,7 +98,9 @@ const html = `<!DOCTYPE html>
   <p>This will <strong>clear</strong> any existing bills in localStorage and insert 10 realistic household bills with dates calculated relative to <em>right now</em>.</p>
 
   <button class="btn" id="go">Seed Bills</button>
+  <a class="btn btn-secondary" href="/seed-debts.html">Seed Debts</a>
   <a class="btn btn-secondary" href="/">← Back to App</a>
+  <p class="local-note">Debt seeding opens the local-only page so personal debt values stay out of the tracked bill seeder.</p>
 
   <div class="msg" id="msg"></div>
   <div id="result" style="display:none">
@@ -186,4 +190,4 @@ console.log(`\n  ✅ Generated public/seed.html\n`);
 console.log("  1. Start the dev server (if not already running):");
 console.log("     npm run dev\n");
 console.log("  2. Open http://localhost:5173/seed.html\n");
-console.log("  3. Click the \"Seed Bills\" button.\n");
+console.log("  3. Click \"Seed Bills\" or use \"Seed Debts\" for the local-only debt data.\n");

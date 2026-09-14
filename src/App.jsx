@@ -4,7 +4,9 @@ import { Route, Routes } from "react-router-dom";
 //components
 import BillsTable from "./components/BillsTable";
 import BillsList from "./components/BillsList";
+import DebtsTable from "./components/DebtsTable";
 import AddBills from "./services/AddBills";
+import AddDebt from "./services/AddDebt";
 import Nav from "./Nav";
 
 //utilities
@@ -14,6 +16,10 @@ import {
   reconcileAllBills,
   validateAllBills,
 } from "./utils/dateUtils";
+import {
+  normalizeDebts,
+  validateAllDebts,
+} from "./utils/debtUtils";
 
 const App = () => {
   const [bills, setBills] = useState(() => {
@@ -65,6 +71,41 @@ const App = () => {
     localStorage.setItem("bills", JSON.stringify(bills));
   }, [bills]);
 
+  // Debts are a separate domain from bills with their own storage key.
+  // New debts have no stored shape to migrate, so load is just
+  // normalize + warn-only validation.
+  const [debts, setDebts] = useState(() => {
+    try {
+      const storedDebts = JSON.parse(localStorage.getItem("debts"));
+
+      if (!storedDebts) {
+        return [];
+      }
+
+      const normalizedDebts = normalizeDebts(storedDebts);
+
+      const validation = validateAllDebts(normalizedDebts);
+      if (!validation.allValid) {
+        console.warn(
+          `Found ${validation.invalidCount} invalid debts after load`,
+        );
+      }
+
+      if (JSON.stringify(normalizedDebts) !== JSON.stringify(storedDebts)) {
+        localStorage.setItem("debts", JSON.stringify(normalizedDebts));
+      }
+
+      return normalizedDebts;
+    } catch (error) {
+      console.error("Error reading debts from localStorage:", error);
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("debts", JSON.stringify(debts));
+  }, [debts]);
+
   const today = new Date();
   const weekFromToday = addDays(today, 7);
 
@@ -88,6 +129,14 @@ const App = () => {
           <Route
             path="/addBill"
             element={<AddBills bills={bills} setBills={setBills} />}
+          />
+          <Route
+            path="/debts"
+            element={<DebtsTable debts={debts} setDebts={setDebts} />}
+          />
+          <Route
+            path="/addDebt"
+            element={<AddDebt debts={debts} setDebts={setDebts} />}
           />
         </Routes>
       </div>

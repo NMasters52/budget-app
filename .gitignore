@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local-only debt seeder: contains real personal financial data. Never commit.
+public/seed-debts.html

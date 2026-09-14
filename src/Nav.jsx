@@ -13,6 +13,7 @@ const Nav = () => {
     { to: "/", label: "Bills Overview" },
     { to: "/list", label: "Bills Preview" },
     { to: "/addBill", label: "Add Bill" },
+    { to: "/debts", label: "Debts" },
   ];
 
   return (
