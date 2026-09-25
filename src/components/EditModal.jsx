@@ -92,8 +92,17 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
       return;
     }
 
+    // Amount comes back from the input as a string; save a number so a
+    // string amount can never reach localStorage and break totals.
+    const amount = Number(formData.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      alert("Bill amount must be a positive number.");
+      return;
+    }
+
     let updatedBill = {
       ...formData,
+      amount,
       id: bill.id,
     };
 

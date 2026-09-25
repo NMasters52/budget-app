@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { IoChevronDown, IoChevronUp, IoFilter } from "react-icons/io5";
-import { formatLocaleDate, toISODate, addDays } from "../utils/dateUtils";
+import { formatLocaleDate, toISODate, addDays, calculateBillsTotal } from "../utils/dateUtils";
 import BillsListCard from "./BillsListCard";
 
 const BillsList = ({ bills, setBills }) => {
@@ -22,7 +22,7 @@ const BillsList = ({ bills, setBills }) => {
     return list;
   }, [bills, fromDate, toDate, sort]);
 
-  const totalCost = filteredBills.reduce((acc, bill) => acc + bill.amount, 0);
+  const totalCost = calculateBillsTotal(filteredBills);
 
   return (
     <div className="max-w-lg mx-auto px-4 pb-10">

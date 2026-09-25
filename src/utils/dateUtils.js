@@ -183,6 +183,12 @@ export const validateBillInput = (bill, today = new Date()) => {
   };
 };
 
+// Sum of bill amounts as a number. Amounts can arrive as strings when a form
+// input value is saved without coercion; adding a string onto the running
+// total produces a string, whose .toFixed call then crashes the Bills Preview.
+export const calculateBillsTotal = (bills) =>
+  bills.reduce((total, bill) => total + Number(bill.amount), 0);
+
 //helps calculate total bills for the year
 export const calculateYearlyTotal = (bills) => {
   const invalidBills = bills.filter(
