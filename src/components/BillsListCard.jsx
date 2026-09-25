@@ -1,34 +1,19 @@
 import { getBillStatus, formatLocaleDate, markBillAsPaid } from "../utils/dateUtils";
 
-const STATUS_BORDER_MAP = {
-  paid: "border-green-400",
-  paid_late: "border-orange-400",
-  overdue: "border-red-400",
-  due_soon: "border-yellow-400",
-  pending: "border-blue-400",
+//design system
+import { CandyButton, Sticker, StickerCard } from "./ui";
+
+const STATUS_MAP = {
+  paid: { label: "Paid", tone: "teal", cardTone: "teal" },
+  paid_late: { label: "Paid late", tone: "mango", cardTone: "default" },
+  overdue: { label: "Overdue", tone: "coral", cardTone: "coral" },
+  due_soon: { label: "Due soon", tone: "mango", cardTone: "mango" },
+  pending: { label: "Scheduled", tone: "slate", cardTone: "default" },
 };
 
-const STATUS_LABEL_MAP = {
-  paid: "Paid",
-  paid_late: "Paid Late",
-  overdue: "Overdue",
-  due_soon: "Due Soon",
-  pending: "Pending",
-};
-
-const STATUS_BADGE_MAP = {
-  paid: "bg-green-50 text-green-600",
-  paid_late: "bg-orange-50 text-orange-600",
-  overdue: "bg-red-50 text-red-600",
-  due_soon: "bg-yellow-50 text-yellow-700",
-  pending: "bg-blue-50 text-blue-600",
-};
-
-const BillsListCard = ({ bill, bills, setBills }) => {
+const BillsListCard = ({ bill, bills, setBills, style }) => {
   const statusKey = getBillStatus(bill);
-  const borderColor = STATUS_BORDER_MAP[statusKey];
-  const statusBadge = STATUS_BADGE_MAP[statusKey];
-  const statusLabel = STATUS_LABEL_MAP[statusKey];
+  const status = STATUS_MAP[statusKey];
   const isPaid = statusKey === "paid" || statusKey === "paid_late";
 
   const handleMarkPaid = () => {
@@ -37,73 +22,66 @@ const BillsListCard = ({ bill, bills, setBills }) => {
   };
 
   return (
-    <div
-      className={`border-s-[3px] ${borderColor} bg-white rounded-xl px-5 py-4 mt-3 transition-shadow hover:shadow-md`}
+    <StickerCard
+      tone={status.cardTone}
+      className="animate-rise mt-3 transition-transform hover:-translate-y-0.5"
+      style={style}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1.5 min-w-0">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <h4 className="font-bold text-lg text-gray-800 truncate">{bill.title}</h4>
-            <span
-              className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadge}`}
-            >
-              {statusLabel}
-            </span>
+            <h4 className="truncate font-display text-lg font-bold text-[#1d1b16]">
+              {bill.title}
+            </h4>
+            <Sticker tone={status.tone}>{status.label}</Sticker>
           </div>
 
-          <p className="text-2xl font-bold text-gray-900 tracking-tight">
-            ${bill.amount}
+          <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-[#1d1b16]">
+            ${Number(bill.amount).toFixed(2)}
           </p>
 
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-gray-400">
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] font-semibold text-[#827e74]">
             <span>
               Due{" "}
-              <span className="text-gray-600 font-medium">
+              <span className="text-[#6f6b61]">
                 {formatLocaleDate(bill.nextDue)}
               </span>
             </span>
             <span>
               Last paid{" "}
-              <span className="text-gray-600 font-medium">
-                {bill.lastPaid ? formatLocaleDate(bill.lastPaid) : "Never"}
+              <span className="text-[#6f6b61]">
+                {bill.lastPaid ? formatLocaleDate(bill.lastPaid) : "never"}
               </span>
             </span>
             <span>
-              Frequency{" "}
-              <span className="text-gray-600 font-medium">
-                {bill.frequency}
-              </span>
+              <span className="text-[#6f6b61]">{bill.frequency}</span>
             </span>
           </div>
         </div>
 
-        {/* Desktop: inline button */}
-        <button
+        {/* Desktop: inline candy pay button */}
+        <CandyButton
+          tone="coral"
+          size="sm"
           onClick={handleMarkPaid}
           disabled={isPaid}
-          className={`hidden sm:flex shrink-0 text-sm font-semibold px-3.5 py-2 rounded-lg cursor-pointer transition-all mt-1 ${
-            isPaid
-              ? "bg-gray-50 text-gray-300 cursor-default"
-              : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700 active:scale-95 shadow-sm"
-          }`}
+          className="mt-1 hidden shrink-0 sm:inline-flex"
         >
           {isPaid ? "✓ Paid" : "Pay"}
-        </button>
+        </CandyButton>
       </div>
 
-      {/* Mobile: full-width button */}
-      <button
+      {/* Mobile: full-width candy pay button */}
+      <CandyButton
+        tone="coral"
+        size="md"
         onClick={handleMarkPaid}
         disabled={isPaid}
-        className={`sm:hidden w-full mt-3 text-base font-semibold py-3 rounded-lg cursor-pointer transition-all ${
-          isPaid
-            ? "bg-gray-50 text-gray-300 cursor-default"
-            : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700 active:scale-[0.98] shadow-sm"
-        }`}
+        className="mt-3 w-full sm:hidden"
       >
-        {isPaid ? "✓ Paid" : "Mark as Paid"}
-      </button>
-    </div>
+        {isPaid ? "✓ Paid" : "Mark as paid"}
+      </CandyButton>
+    </StickerCard>
   );
 };
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 
 //components
-import BillsTable from "./components/BillsTable";
+import BillsOverview from "./components/BillsOverview";
 import BillsList from "./components/BillsList";
 import DebtsTable from "./components/DebtsTable";
 import AddBills from "./services/AddBills";
@@ -111,7 +111,7 @@ const App = () => {
   const weekFromToday = addDays(today, 7);
 
   return (
-    <main className="bg-gray-100 min-h-screen flex flex-col">
+    <main className="page-grid flex min-h-screen flex-col bg-white font-sans text-[#1d1b16]">
       <Nav />
       <div className="flex-1">
         <ErrorBoundary>
@@ -119,7 +119,7 @@ const App = () => {
           <Route
             path="/"
             element={
-              <BillsTable
+              <BillsOverview
                 bills={bills}
                 setBills={setBills}
                 today={today}
@@ -143,8 +143,10 @@ const App = () => {
           </Routes>
         </ErrorBoundary>
       </div>
-      <footer className="bg-green-600 text-white text-center py-4 mt-auto">
-        <p className="text-sm">Bill Buddy &copy; {new Date().getFullYear()}</p>
+      <footer className="mt-auto border-t-2 border-[#1d1b16] bg-[#faf7ef] py-5 text-center">
+        <p className="text-sm font-bold text-[#6f6b61]">
+          Bill Buddy &copy; {new Date().getFullYear()}
+        </p>
       </footer>
     </main>
   );

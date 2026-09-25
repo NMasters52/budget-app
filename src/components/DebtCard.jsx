@@ -6,6 +6,9 @@ import UpdateBalanceModal from "./UpdateBalanceModal";
 import EditDebtModal from "./EditDebtModal";
 import DeleteDebt from "../services/DeleteDebt";
 
+//design system
+import { CandyButton, Meter, Sticker, StickerCard } from "./ui";
+
 //helper functions
 import {
   formatCurrency,
@@ -30,76 +33,65 @@ const DebtCard = ({ debt, debts, setDebts }) => {
 
   const closeModal = () => setActiveModal(null);
 
-  const cardBorder = paidOff
-    ? "border-2 border-green-400"
-    : debt.isCurrentTarget
-      ? "border-2 border-green-500 ring-2 ring-green-200"
-      : "border-s-[3px] border-gray-300";
+  // Card outline highlights state: paid off goes teal, the current target
+  // gets the ink treatment.
+  const cardTone = paidOff ? "teal" : debt.isCurrentTarget ? "mango" : "default";
 
   return (
-    <div
-      className={`${cardBorder} bg-white rounded-xl px-5 py-4 mt-3 transition-shadow hover:shadow-md`}
+    <StickerCard
+      tone={cardTone}
+      className="animate-rise transition-transform hover:-translate-y-0.5"
     >
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h4 className="font-bold text-lg text-gray-800 truncate">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <h4 className="truncate font-display text-lg font-bold text-[#1d1b16]">
             {debt.name}
           </h4>
-          {paidOff && (
-            <span className="shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-600">
-              Paid Off
-            </span>
-          )}
-          {debt.isCurrentTarget && (
-            <span className="shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-500 text-white">
-              Current Target
-            </span>
-          )}
-          {debt.includeInPayoffGoal && (
-            <span className="shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
-              In Payoff Goal
-            </span>
+          {paidOff && <Sticker tone="teal">Paid off</Sticker>}
+          {debt.isCurrentTarget && <Sticker tone="ink">Current target</Sticker>}
+          {debt.includeInPayoffGoal && !paidOff && (
+            <Sticker tone="slate">In payoff goal</Sticker>
           )}
         </div>
 
-        <p className="text-2xl font-bold text-gray-900 tracking-tight">
-          {formatCurrency(debt.currentBalance)} remaining
+        <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-[#1d1b16]">
+          {formatCurrency(debt.currentBalance)}{" "}
+          <span className="text-sm font-semibold text-[#6f6b61]">remaining</span>
         </p>
 
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-gray-400">
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] font-semibold text-[#827e74]">
           <span>
-            Owner:{" "}
-            <span className="text-gray-600 font-medium">{debt.owner}</span>
+            Owner: <span className="text-[#6f6b61]">{debt.owner}</span>
           </span>
           <span>
             Type:{" "}
-            <span className="text-gray-600 font-medium">
+            <span className="text-[#6f6b61]">
               {DEBT_TYPE_LABELS[debt.type] ?? debt.type}
             </span>
           </span>
           <span>
             Starting:{" "}
-            <span className="text-gray-600 font-medium">
+            <span className="text-[#6f6b61]">
               {formatCurrency(debt.startingBalance)}
             </span>
           </span>
           <span>
             Minimum:{" "}
-            <span className="text-gray-600 font-medium">
+            <span className="text-[#6f6b61]">
               {formatCurrency(debt.minimumPayment)}
             </span>
           </span>
           {dueDayInMonth(debt, new Date()) != null && (
             <span>
-              Minimum due on the{" "}
-              <span className="text-gray-600 font-medium">
+              Due on the{" "}
+              <span className="text-[#6f6b61]">
                 {formatDayOrdinal(dueDayInMonth(debt, new Date()))}
               </span>
             </span>
           )}
           <span>
             Last paid{" "}
-            <span className="text-gray-600 font-medium">
+            <span className="text-[#6f6b61]">
               {lastPayment
                 ? `${formatCurrency(lastPayment.amount)} on ${formatLocaleDate(lastPayment.date)}`
                 : "never"}
@@ -107,50 +99,47 @@ const DebtCard = ({ debt, debts, setDebts }) => {
           </span>
           {debt.apr != null && (
             <span>
-              APR:{" "}
-              <span className="text-gray-600 font-medium">{debt.apr}%</span>
+              APR: <span className="text-[#6f6b61]">{debt.apr}%</span>
             </span>
           )}
         </div>
 
         <div className="mt-1">
-          <p className="text-sm font-semibold text-green-600">
+          <p
+            className={`text-sm font-extrabold ${
+              paidOff ? "text-[#1d7d77]" : "text-[#2aa8a0]"
+            }`}
+          >
             {percentage.toFixed(2)}% paid off
           </p>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-            <div
-              className="bg-green-500 h-2 rounded-full transition-all"
-              style={{ width: `${barWidth}%` }}
-            />
-          </div>
+          <Meter value={barWidth} tone="teal" height="h-2.5" className="mt-1.5" />
         </div>
       </div>
 
       {/* Action row. The modals render their own overlay. */}
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        <button
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <CandyButton
+          tone="teal"
+          size="sm"
           onClick={() => setActiveModal("payment")}
           disabled={paidOff}
-          className={`text-sm font-semibold px-3.5 py-2 rounded-lg cursor-pointer transition-all ${
-            paidOff
-              ? "bg-gray-50 text-gray-300 cursor-default"
-              : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700 active:scale-95 shadow-sm"
-          }`}
         >
-          Record Payment
-        </button>
-        <button
+          Record payment
+        </CandyButton>
+        <CandyButton
+          tone="ink"
+          size="sm"
           onClick={() => setActiveModal("balance")}
-          className="text-sm font-semibold px-3.5 py-2 rounded-lg cursor-pointer transition-all bg-blue-500 text-white hover:bg-blue-600 active:scale-95 shadow-sm"
         >
-          Update Balance
-        </button>
-        <button
+          Update balance
+        </CandyButton>
+        <CandyButton
+          tone="ghost"
+          size="sm"
           onClick={() => setActiveModal("edit")}
-          className="text-sm font-semibold px-3.5 py-2 rounded-lg cursor-pointer transition-all border-2 border-gray-500 text-gray-700 hover:bg-gray-100"
         >
           Edit
-        </button>
+        </CandyButton>
         <DeleteDebt debt={debt} debts={debts} setDebts={setDebts} />
       </div>
 
@@ -180,7 +169,7 @@ const DebtCard = ({ debt, debts, setDebts }) => {
           onClose={closeModal}
         />
       )}
-    </div>
+    </StickerCard>
   );
 };
 

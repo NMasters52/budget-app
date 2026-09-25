@@ -1,4 +1,4 @@
-import { HiTrash } from "react-icons/hi";
+import { HiTrash } from "react-icons/hi2";
 
 const DeleteDebt = ({ debt, debts, setDebts }) => {
   const onDelete = () => {
@@ -18,11 +18,12 @@ const DeleteDebt = ({ debt, debts, setDebts }) => {
 
   return (
     <button
+      type="button"
       onClick={onDelete}
       aria-label={`Delete ${debt.name}`}
-      className="bg-red-500 hover:bg-red-400 text-white text-2xl p-2 rounded-md cursor-pointer"
+      className="cursor-pointer rounded-full border-2 border-[#1d1b16]/20 bg-white p-2.5 text-[#d64522] transition-colors hover:border-[#ff6b4a] hover:bg-[#ff6b4a]/10"
     >
-      <HiTrash />
+      <HiTrash aria-hidden="true" />
     </button>
   );
 };

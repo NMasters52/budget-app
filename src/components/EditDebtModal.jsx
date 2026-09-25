@@ -9,6 +9,10 @@ import {
   clearCurrentTarget,
 } from "../utils/debtUtils";
 
+//design system
+import { CandyButton, Field, ModalShell } from "./ui";
+import { inputClass } from "./uiClasses";
+
 // Overlay for editing a debt's record. Changing the starting balance is
 // flagged in the form because payoff progress is calculated against it.
 //
@@ -97,52 +101,37 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div
-        className="flex items-center justify-center absolute inset-0 bg-black/30 backdrop-blur-sm"
-        onClick={onClose}
-      >
-        <form
-          className="relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-lg max-h-[85vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-          onSubmit={handleSubmit}
+    <ModalShell title="Edit debt" onClose={onClose} wide>
+      {error && (
+        <div
+          className="mb-4 rounded-2xl border-2 border-[#ff6b4a] bg-[#ff6b4a]/10 px-4 py-3 text-sm font-bold text-[#a83a1c]"
+          role="alert"
         >
-          <h3 className="mb-4 font-bold text-2xl">Edit Debt</h3>
+          {error}
+        </div>
+      )}
 
-          {error && (
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-              role="alert"
-            >
-              {error}
-            </div>
-          )}
+      <form onSubmit={handleSubmit}>
+        <Field label="Name" htmlFor="debt-name">
+          <input
+            type="text"
+            name="name"
+            id="debt-name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            className={inputClass}
+          />
+        </Field>
 
-          <div className="mb-4">
-            <label htmlFor="debt-name" className="block font-semibold">
-              Name:
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="debt-name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full border-2 border-black rounded-sm p-2"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="debt-owner" className="block font-semibold">
-              Owner:
-            </label>
+        <div className="flex gap-3">
+          <Field label="Owner" htmlFor="debt-owner">
             <select
               name="owner"
               id="debt-owner"
               value={formData.owner}
               onChange={handleChange}
-              className="w-full border-2 border-black rounded-sm p-2"
+              className={`${inputClass} cursor-pointer`}
             >
               {DEBT_OWNERS.map((owner) => (
                 <option key={owner} value={owner}>
@@ -150,18 +139,15 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
                 </option>
               ))}
             </select>
-          </div>
+          </Field>
 
-          <div className="mb-4">
-            <label htmlFor="debt-type" className="block font-semibold">
-              Type:
-            </label>
+          <Field label="Type" htmlFor="debt-type">
             <select
               name="type"
               id="debt-type"
               value={formData.type}
               onChange={handleChange}
-              className="w-full border-2 border-black rounded-sm p-2"
+              className={`${inputClass} cursor-pointer`}
             >
               {DEBT_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -169,183 +155,147 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
                 </option>
               ))}
             </select>
-          </div>
+          </Field>
+        </div>
 
-          <div className="mb-4">
-            <label
-              htmlFor="debt-starting-balance"
-              className="block font-semibold"
+        <Field label="Starting balance" htmlFor="debt-starting-balance">
+          <input
+            type="number"
+            name="startingBalance"
+            id="debt-starting-balance"
+            required
+            step="0.01"
+            min="0.01"
+            inputMode="decimal"
+            value={formData.startingBalance}
+            onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            className={inputClass}
+          />
+          {startingBalanceChanged && (
+            <div
+              className="mt-2 rounded-2xl border-2 border-[#f59f00] bg-[#f59f00]/10 px-4 py-3 text-[13px] font-bold text-[#a86e00]"
+              role="alert"
             >
-              Starting Balance:
-            </label>
-            <input
-              type="number"
-              name="startingBalance"
-              id="debt-starting-balance"
-              required
-              step="0.01"
-              min="0.01"
-              inputMode="decimal"
-              value={formData.startingBalance}
-              onChange={handleChange}
-              onWheel={(e) => e.target.blur()}
-              className="w-full border-2 border-black rounded-sm p-2"
-            />
-            {startingBalanceChanged && (
-              <div
-                className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mt-2"
-                role="alert"
-              >
-                Changing the starting balance recalculates historical payoff
-                progress for this debt.
-              </div>
+              Changing the starting balance recalculates historical payoff
+              progress for this debt.
+            </div>
+          )}
+        </Field>
+
+        <Field label="Current balance" htmlFor="debt-current-balance">
+          <input
+            type="number"
+            name="currentBalance"
+            id="debt-current-balance"
+            required
+            step="0.01"
+            min="0"
+            inputMode="decimal"
+            value={formData.currentBalance}
+            onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field label="Minimum payment" htmlFor="debt-minimum-payment">
+          <input
+            type="number"
+            name="minimumPayment"
+            id="debt-minimum-payment"
+            required
+            step="0.01"
+            min="0.01"
+            inputMode="decimal"
+            value={formData.minimumPayment}
+            onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field
+          label="Minimum due day"
+          htmlFor="debt-minimum-payment-due-day"
+          hint="Optional — leave blank if you do not know the recurring due day."
+        >
+          <input
+            type="number"
+            name="minimumPaymentDueDay"
+            id="debt-minimum-payment-due-day"
+            min="1"
+            max="31"
+            step="1"
+            inputMode="numeric"
+            placeholder="Day of the month, e.g. 22"
+            value={formData.minimumPaymentDueDay}
+            onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field label="APR" htmlFor="debt-apr" hint="Optional.">
+          <input
+            type="number"
+            name="apr"
+            id="debt-apr"
+            step="0.01"
+            min="0"
+            max="100"
+            inputMode="decimal"
+            placeholder="Leave empty if none"
+            value={formData.apr}
+            onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            className={inputClass}
+          />
+        </Field>
+
+        <label className="mb-4 flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] px-4 py-3">
+          <input
+            type="checkbox"
+            name="includeInPayoffGoal"
+            checked={formData.includeInPayoffGoal}
+            onChange={handleChange}
+            className="h-5 w-5 shrink-0 accent-[#2aa8a0]"
+          />
+          <span className="text-sm font-bold text-[#1d1b16]">
+            Include in payoff goal
+          </span>
+        </label>
+
+        <Field label="Current target" htmlFor="debt-target">
+          <select
+            name="targetSelection"
+            id="debt-target"
+            value={targetSelection}
+            onChange={(e) => setTargetSelection(e.target.value)}
+            className={`${inputClass} cursor-pointer`}
+          >
+            <option value="">No current target</option>
+            {debt.isCurrentTarget && (
+              <option value={debt.id}>{debt.name}</option>
             )}
-          </div>
+            {targetOptions.map((candidate) => (
+              <option key={candidate.id} value={candidate.id}>
+                {candidate.name}
+              </option>
+            ))}
+          </select>
+        </Field>
 
-          <div className="mb-4">
-            <label
-              htmlFor="debt-current-balance"
-              className="block font-semibold"
-            >
-              Current Balance:
-            </label>
-            <input
-              type="number"
-              name="currentBalance"
-              id="debt-current-balance"
-              required
-              step="0.01"
-              min="0"
-              inputMode="decimal"
-              value={formData.currentBalance}
-              onChange={handleChange}
-              onWheel={(e) => e.target.blur()}
-              className="w-full border-2 border-black rounded-sm p-2"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="debt-minimum-payment"
-              className="block font-semibold"
-            >
-              Minimum Payment:
-            </label>
-            <input
-              type="number"
-              name="minimumPayment"
-              id="debt-minimum-payment"
-              required
-              step="0.01"
-              min="0.01"
-              inputMode="decimal"
-              value={formData.minimumPayment}
-              onChange={handleChange}
-              onWheel={(e) => e.target.blur()}
-              className="w-full border-2 border-black rounded-sm p-2"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="debt-minimum-payment-due-day"
-              className="block font-semibold"
-            >
-              Minimum Payment Due Day (optional):
-            </label>
-            <input
-              type="number"
-              name="minimumPaymentDueDay"
-              id="debt-minimum-payment-due-day"
-              min="1"
-              max="31"
-              step="1"
-              inputMode="numeric"
-              placeholder="Day of the month, e.g. 22"
-              value={formData.minimumPaymentDueDay}
-              onChange={handleChange}
-              onWheel={(e) => e.target.blur()}
-              className="w-full border-2 border-black rounded-sm p-2"
-            />
-            <p className="text-sm text-gray-600 mt-1">
-              Leave blank if you do not know the recurring due day.
-            </p>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="debt-apr" className="block font-semibold">
-              APR (optional):
-            </label>
-            <input
-              type="number"
-              name="apr"
-              id="debt-apr"
-              step="0.01"
-              min="0"
-              max="100"
-              inputMode="decimal"
-              placeholder="Leave empty if none"
-              value={formData.apr}
-              onChange={handleChange}
-              onWheel={(e) => e.target.blur()}
-              className="w-full border-2 border-black rounded-sm p-2"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="includeInPayoffGoal"
-                checked={formData.includeInPayoffGoal}
-                onChange={handleChange}
-                className="w-5 h-5 border-2 border-black rounded"
-              />
-              <span className="font-semibold">Include in Payoff Goal</span>
-            </label>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="debt-target" className="block font-semibold">
-              Current Target:
-            </label>
-            <select
-              name="targetSelection"
-              id="debt-target"
-              value={targetSelection}
-              onChange={(e) => setTargetSelection(e.target.value)}
-              className="w-full border-2 border-black rounded-sm p-2"
-            >
-              <option value="">No current target</option>
-              {debt.isCurrentTarget && (
-                <option value={debt.id}>{debt.name}</option>
-              )}
-              {targetOptions.map((candidate) => (
-                <option key={candidate.id} value={candidate.id}>
-                  {candidate.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2 mt-4">
-            <button
-              type="submit"
-              className="w-full p-3 cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md text-white"
-            >
-              Submit
-            </button>
-            <button
-              type="button"
-              className="w-full p-3 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="mt-4 flex flex-col gap-2">
+          <CandyButton type="submit" tone="teal" size="lg" className="w-full">
+            Save changes
+          </CandyButton>
+          <CandyButton tone="ghost" size="md" className="w-full" onClick={onClose}>
+            Cancel
+          </CandyButton>
+        </div>
+      </form>
+    </ModalShell>
   );
 };
 

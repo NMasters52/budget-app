@@ -8,6 +8,10 @@ import {
   validateDebtInput,
 } from "../utils/debtUtils";
 
+//design system
+import { CandyButton, Field, PageHeading, StickerCard } from "../components/ui";
+import { inputClass } from "../components/uiClasses";
+
 const AddDebt = ({ debts, setDebts }) => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
@@ -51,209 +55,193 @@ const AddDebt = ({ debts, setDebts }) => {
   };
 
   return (
-    <form
-      className="w-xs sm:w-lg md:w-xl p-4 border-2 border-gray-500 rounded-lg shadow-md mx-auto"
-      onSubmit={submitNewDebt}
-    >
-      <h3 className="mb-4 p-2 font-bold text-2xl">Add New Debt</h3>
+    <div className="mx-auto max-w-xl px-4 pt-10 pb-16">
+      <PageHeading
+        kicker="New entry"
+        title="Add a debt"
+        sub="Track a balance and fold it into the payoff plan."
+      />
 
-      {error && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-          role="alert"
-        >
-          {error}
-        </div>
-      )}
+      <StickerCard className="mt-6">
+        <form onSubmit={submitNewDebt}>
+          {error && (
+            <div
+              className="mb-4 rounded-2xl border-2 border-[#ff6b4a] bg-[#ff6b4a]/10 px-4 py-3 text-sm font-bold text-[#a83a1c]"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
 
-      <div className="mb-4">
-        <label htmlFor="name" className="block font-semibold">
-          Name:
-        </label>
-        <input
-          type="text"
-          name="name"
-          required
-          value={formData.name}
-          placeholder="Chase Sapphire"
-          onChange={(e) => handleChange(e)}
-          className="w-full border-2 border-black rounded-sm p-2"
-        />
-      </div>
+          <Field label="Name" htmlFor="name">
+            <input
+              type="text"
+              name="name"
+              required
+              value={formData.name}
+              placeholder="Chase Sapphire"
+              onChange={(e) => handleChange(e)}
+              className={inputClass}
+            />
+          </Field>
 
-      <div className="mb-4">
-        <label htmlFor="owner" className="block font-semibold">
-          Owner:
-        </label>
-        <select
-          id="owner"
-          name="owner"
-          value={formData.owner}
-          onChange={(e) => handleChange(e)}
-          className="w-full border-2 border-black rounded-sm p-2"
-        >
-          {DEBT_OWNERS.map((owner) => (
-            <option key={owner} value={owner}>
-              {owner}
-            </option>
-          ))}
-        </select>
-      </div>
+          <Field label="Owner" htmlFor="owner">
+            <select
+              id="owner"
+              name="owner"
+              value={formData.owner}
+              onChange={(e) => handleChange(e)}
+              className={`${inputClass} cursor-pointer`}
+            >
+              {DEBT_OWNERS.map((owner) => (
+                <option key={owner} value={owner}>
+                  {owner}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-      <div className="mb-4">
-        <label htmlFor="type" className="block font-semibold">
-          Debt Type:
-        </label>
-        <select
-          id="type"
-          name="type"
-          value={formData.type}
-          onChange={(e) => handleChange(e)}
-          className="w-full border-2 border-black rounded-sm p-2"
-        >
-          {DEBT_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {DEBT_TYPE_LABELS[type]}
-            </option>
-          ))}
-        </select>
-      </div>
+          <Field label="Debt type" htmlFor="type">
+            <select
+              id="type"
+              name="type"
+              value={formData.type}
+              onChange={(e) => handleChange(e)}
+              className={`${inputClass} cursor-pointer`}
+            >
+              {DEBT_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {DEBT_TYPE_LABELS[type]}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-      <div className="mb-4">
-        <label htmlFor="startingBalance" className="block font-semibold">
-          Starting Balance:
-        </label>
-        <input
-          type="number"
-          id="startingBalance"
-          name="startingBalance"
-          required
-          min="0.01"
-          step="0.01"
-          inputMode="decimal"
-          value={formData.startingBalance}
-          onChange={(e) => handleChange(e)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full border-2 border-black rounded-sm p-2"
-        />
-      </div>
+          <Field label="Starting balance" htmlFor="startingBalance">
+            <input
+              type="number"
+              id="startingBalance"
+              name="startingBalance"
+              required
+              min="0.01"
+              step="0.01"
+              inputMode="decimal"
+              value={formData.startingBalance}
+              onChange={(e) => handleChange(e)}
+              onWheel={(e) => e.target.blur()}
+              className={inputClass}
+            />
+          </Field>
 
-      <div className="mb-4">
-        <label htmlFor="currentBalance" className="block font-semibold">
-          Current Balance:
-        </label>
-        <input
-          type="number"
-          id="currentBalance"
-          name="currentBalance"
-          required
-          min="0"
-          step="0.01"
-          inputMode="decimal"
-          value={formData.currentBalance}
-          onChange={(e) => handleChange(e)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full border-2 border-black rounded-sm p-2"
-        />
-        <p className="text-sm text-gray-600 mt-1">
-          Leave equal to starting balance if the debt is new to tracking.
+          <Field
+            label="Current balance"
+            htmlFor="currentBalance"
+            hint="Leave equal to the starting balance if this debt is new to tracking."
+          >
+            <input
+              type="number"
+              id="currentBalance"
+              name="currentBalance"
+              required
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={formData.currentBalance}
+              onChange={(e) => handleChange(e)}
+              onWheel={(e) => e.target.blur()}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Minimum payment" htmlFor="minimumPayment">
+            <input
+              type="number"
+              id="minimumPayment"
+              name="minimumPayment"
+              required
+              min="0.01"
+              step="0.01"
+              inputMode="decimal"
+              value={formData.minimumPayment}
+              onChange={(e) => handleChange(e)}
+              onWheel={(e) => e.target.blur()}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field
+            label="Minimum due day"
+            htmlFor="minimumPaymentDueDay"
+            hint="Optional — day of the month, e.g. 22. Leave blank if unknown."
+          >
+            <input
+              type="number"
+              id="minimumPaymentDueDay"
+              name="minimumPaymentDueDay"
+              min="1"
+              max="31"
+              step="1"
+              inputMode="numeric"
+              placeholder="Day of the month"
+              value={formData.minimumPaymentDueDay}
+              onChange={(e) => handleChange(e)}
+              onWheel={(e) => e.target.blur()}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field
+            label="APR"
+            htmlFor="apr"
+            hint="Optional — annual percentage rate, when you have it."
+          >
+            <input
+              type="number"
+              id="apr"
+              name="apr"
+              step="0.01"
+              min="0"
+              max="100"
+              inputMode="decimal"
+              placeholder="Leave blank if unknown"
+              value={formData.apr}
+              onChange={(e) => handleChange(e)}
+              onWheel={(e) => e.target.blur()}
+              className={inputClass}
+            />
+          </Field>
+
+          <label className="mb-5 flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] px-4 py-3">
+            <input
+              type="checkbox"
+              name="includeInPayoffGoal"
+              checked={formData.includeInPayoffGoal}
+              onChange={handleChange}
+              className="h-5 w-5 shrink-0 accent-[#ff6b4a]"
+            />
+            <span className="text-sm font-bold text-[#1d1b16]">
+              Include in payoff goal
+              <span className="block text-[13px] font-semibold text-[#6f6b61]">
+                Counts toward the payoff plan on the Debts page.
+              </span>
+            </span>
+          </label>
+
+          <CandyButton type="submit" tone="coral" size="lg" className="w-full">
+            Add debt
+          </CandyButton>
+        </form>
+
+        <p className="mt-4 text-center">
+          <Link
+            to="/debts"
+            className="text-sm font-extrabold text-[#2aa8a0] underline decoration-2 underline-offset-4 hover:text-[#1d7d77]"
+          >
+            Back to debts
+          </Link>
         </p>
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="minimumPayment" className="block font-semibold">
-          Minimum Payment:
-        </label>
-        <input
-          type="number"
-          id="minimumPayment"
-          name="minimumPayment"
-          required
-          min="0.01"
-          step="0.01"
-          inputMode="decimal"
-          value={formData.minimumPayment}
-          onChange={(e) => handleChange(e)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full border-2 border-black rounded-sm p-2"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="minimumPaymentDueDay" className="block font-semibold">
-          Minimum Payment Due Day (optional):
-        </label>
-        <input
-          type="number"
-          id="minimumPaymentDueDay"
-          name="minimumPaymentDueDay"
-          min="1"
-          max="31"
-          step="1"
-          inputMode="numeric"
-          placeholder="Day of the month, e.g. 22"
-          value={formData.minimumPaymentDueDay}
-          onChange={(e) => handleChange(e)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full border-2 border-black rounded-sm p-2"
-        />
-        <p className="text-sm text-gray-600 mt-1">
-          Leave blank if you do not know the recurring due day.
-        </p>
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="apr" className="block font-semibold">
-          APR (optional):
-        </label>
-        <input
-          type="number"
-          id="apr"
-          name="apr"
-          step="0.01"
-          min="0"
-          max="100"
-          inputMode="decimal"
-          placeholder="Leave blank if unknown"
-          value={formData.apr}
-          onChange={(e) => handleChange(e)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full border-2 border-black rounded-sm p-2"
-        />
-        <p className="text-sm text-gray-600 mt-1">
-          Enter the annual percentage rate when you have it.
-        </p>
-      </div>
-
-      <div className="mb-4">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="includeInPayoffGoal"
-            checked={formData.includeInPayoffGoal}
-            onChange={handleChange}
-            className="w-5 h-5 border-2 border-black rounded"
-          />
-          <span className="font-semibold">Include in payoff goal</span>
-        </label>
-      </div>
-
-      <button
-        type="submit"
-        className="bg-blue-600 hover:bg-blue-300 cursor-pointer w-full shadow-md rounded-lg text-white p-2"
-      >
-        Add New Debt
-      </button>
-
-      <p className="mt-4 text-center">
-        <Link
-          to="/debts"
-          className="text-green-500 hover:underline hover:underline-offset-4"
-        >
-          Back to Debts
-        </Link>
-      </p>
-    </form>
+      </StickerCard>
+    </div>
   );
 };
 

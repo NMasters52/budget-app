@@ -37,27 +37,26 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <div className="max-w-lg mx-auto px-4 py-16 text-center">
-          <p className="text-5xl mb-4">⚠️</p>
-          <h1 className="text-2xl font-bold text-gray-900">
+        <div className="mx-auto max-w-lg px-4 py-16 text-center">
+          <p className="mb-4 font-display text-2xl font-bold text-[#1d1b16]">
             Something went wrong
-          </h1>
-          <p className="text-gray-500 mt-2">
+          </p>
+          <p className="mt-2 font-semibold text-[#6f6b61]">
             Bill Buddy hit an unexpected error. Reloading usually fixes it.
           </p>
-          <pre className="mt-4 text-left text-xs bg-gray-100 text-gray-600 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">
+          <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] p-3 text-left text-xs text-[#6f6b61]">
             {this.state.error.message}
           </pre>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <button
               onClick={this.handleReload}
-              className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 cursor-pointer"
+              className="cursor-pointer rounded-full border-2 border-[#1d1b16] bg-[#ff6b4a] px-4 py-2 font-extrabold text-white shadow-[3px_4px_0_#1d1b16] transition-all hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[3px] active:shadow-none"
             >
               Reload
             </button>
             <button
               onClick={this.handleResetData}
-              className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 cursor-pointer"
+              className="cursor-pointer rounded-full border-2 border-[#1d1b16]/20 bg-white px-4 py-2 font-extrabold text-[#1d1b16] shadow-[3px_4px_0_rgba(29,27,22,0.12)] transition-all hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[3px] active:shadow-none"
             >
               Clear saved data
             </button>

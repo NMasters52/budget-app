@@ -10,6 +10,12 @@ import {
 } from "../utils/dateUtils";
 import FrequencySelect from "./FrequencySelect";
 
+//design system
+import { CandyButton, Field } from "./ui";
+import { inputClass } from "./uiClasses";
+
+// Edit form for one bill. Renders inside a ModalShell owned by the
+// caller, so this component is the form only — no heading, no overlay.
 const EditModal = ({ bill, bills, onSave, onClose }) => {
   const [formData, setFormData] = useState({
     title: bill.title,
@@ -136,30 +142,19 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
   };
 
   return (
-    <form
-      className="border-2 bg-white border-gray-500 rounded-lg shadow-md p-4"
-      onSubmit={handleSubmit}
-    >
-      <h3 className="mb-4 p-2 font-bold text-2xl">Edit Bill: {bill.title}</h3>
-
-      <div className="mb-4">
-        <label htmlFor="title" className="block font-semibold">
-          Bill Title:
-        </label>
+    <form onSubmit={handleSubmit}>
+      <Field label="Bill title" htmlFor="title">
         <input
           type="text"
           name="title"
           value={formData.title}
           placeholder={formData.title}
           onChange={(e) => handleChange(e)}
-          className="w-full border-2 border-black rounded-sm p-2"
+          className={inputClass}
         />
-      </div>
+      </Field>
 
-      <div className="mb-4">
-        <label htmlFor="amount" className="block font-semibold">
-          Bill Amount:
-        </label>
+      <Field label="Bill amount" htmlFor="amount">
         <input
           type="number"
           name="amount"
@@ -167,28 +162,22 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
           value={formData.amount}
           onChange={(e) => handleChange(e)}
           onWheel={(e) => e.target.blur()}
-          className="w-full border-2 border-black rounded-sm p-2"
+          className={inputClass}
         />
-      </div>
+      </Field>
 
-      <div className="mb-4">
-        <label htmlFor="nextDue" className="block font-semibold">
-          Next Billing Date:
-        </label>
+      <Field label="Next billing date" htmlFor="nextDue">
         <input
           type="date"
           name="nextDue"
           placeholder={bill.nextDue}
           value={formData.nextDue}
           onChange={(e) => handleChange(e)}
-          className="w-full border-2 border-black rounded-sm p-2"
+          className={inputClass}
         />
-      </div>
+      </Field>
 
-      <div className="mb-4">
-        <label htmlFor="lastPaid" className="block font-semibold">
-          Last Paid Date:
-        </label>
+      <Field label="Last paid date" htmlFor="lastPaid">
         <div className="flex gap-2">
           <input
             type="date"
@@ -197,7 +186,7 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
             value={formData.lastPaid}
             onChange={(e) => handleChange(e)}
             max={getTodayISODate()}
-            className="w-full border-2 border-black rounded-sm p-2"
+            className={inputClass}
           />
           {formData.lastPaid && (
             <button
@@ -205,74 +194,64 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
               onClick={() =>
                 handleChange({ target: { name: "lastPaid", value: "" } })
               }
-              className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              className="shrink-0 cursor-pointer rounded-xl border-2 border-[#ff6b4a]/40 bg-white px-4 font-extrabold text-[#d64522] transition-colors hover:border-[#ff6b4a]"
               title="Clear date"
             >
               Clear
             </button>
           )}
         </div>
-      </div>
+      </Field>
 
-      <div className="mb-4">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="autoCalculateDue"
-            checked={formData.autoCalculateDue}
-            onChange={handleChange}
-            className="w-5 h-5 border-2 border-black rounded"
-          />
-          <span className="font-semibold">Auto-calculate Next Due Date</span>
-        </label>
-        <p className="text-sm text-gray-600 mt-1">
-          When checked, the next due date will be automatically calculated based
-          on the last paid date and bill frequency.
-        </p>
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="frequency" className="block font-semibold">
-          Bill Frequency:
-        </label>
+      <Field label="Bill frequency" htmlFor="frequency">
         <FrequencySelect
           value={formData.frequency}
           onChange={handleChange}
-          className="w-full border-2 border-black rounded-sm p-2"
+          className={`${inputClass} cursor-pointer`}
         />
-      </div>
+      </Field>
 
-      <div className="mb-4">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="isPaid"
-            checked={formData.isPaid}
-            onChange={handleMarkPaidToggle}
-            className="w-5 h-5 border-2 border-black rounded"
-          />
-          <span className="font-semibold">Mark as Paid</span>
-        </label>
-        <p className="text-sm text-gray-600 mt-1">
-          {formData.isPaid
-            ? "Unchecking will revert to previous due date and clear last paid date."
-            : "Checking will set last paid to today and calculate next due date."}
-        </p>
-      </div>
+      <label className="mb-4 flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] px-4 py-3">
+        <input
+          type="checkbox"
+          name="autoCalculateDue"
+          checked={formData.autoCalculateDue}
+          onChange={handleChange}
+          className="h-5 w-5 shrink-0 accent-[#ff6b4a]"
+        />
+        <span className="text-sm font-bold text-[#1d1b16]">
+          Auto-calculate next due date
+          <span className="block text-[13px] font-semibold text-[#6f6b61]">
+            Derives it from the last paid date and frequency.
+          </span>
+        </span>
+      </label>
 
-      <div className="flex flex-col gap-2 mt-4">
-        <button
-          className="w-full p-3 cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md text-white"
-          type="submit"
-        >
-          Submit
-        </button>
-        <button
-          className="w-full p-3 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600"
-          onClick={onClose}
-        >
+      <label className="mb-5 flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] px-4 py-3">
+        <input
+          type="checkbox"
+          name="isPaid"
+          checked={formData.isPaid}
+          onChange={handleMarkPaidToggle}
+          className="h-5 w-5 shrink-0 accent-[#2aa8a0]"
+        />
+        <span className="text-sm font-bold text-[#1d1b16]">
+          Mark as paid
+          <span className="block text-[13px] font-semibold text-[#6f6b61]">
+            {formData.isPaid
+              ? "Unchecking reverts to the previous due date and clears last paid."
+              : "Checking sets last paid to today and bumps the due date."}
+          </span>
+        </span>
+      </label>
+
+      <div className="flex flex-col gap-2">
+        <CandyButton type="submit" tone="teal" size="lg" className="w-full">
+          Save changes
+        </CandyButton>
+        <CandyButton tone="ghost" size="md" className="w-full" onClick={onClose}>
           Cancel
-        </button>
+        </CandyButton>
       </div>
     </form>
   );
