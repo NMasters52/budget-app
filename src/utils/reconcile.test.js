@@ -138,18 +138,41 @@ describe("reconcileBillOnOpen", () => {
 describe("resolveBillMissedDates", () => {
   const bill = reconcileBillOnOpen(makeBill(), TODAY);
 
-  test("resolving as paid records late history and moves lastPaid", () => {
+  test("resolving as paid stamps the resolution day, not the missed date", () => {
+    // Resolved on Sep 10 even though the missed dates are Jul-Sep 9.
     const resolved = resolveBillMissedDates(
       bill,
       bill.unpaidDueDates,
       "paid",
+      TODAY,
     );
 
     expect(resolved.unpaidDueDates).toEqual([]);
-    expect(resolved.lastPaid).toBe("2026-09-09"); // latest resolved date
+    expect(resolved.lastPaid).toBe("2026-09-10"); // the day you clicked
     expect(resolved.paymentHistory).toHaveLength(3);
+    // Each entry keeps the missed date it covers, like the paid button does.
+    expect(resolved.paymentHistory.map((h) => h.originalDueDate)).toEqual([
+      "2026-07-09",
+      "2026-08-09",
+      "2026-09-09",
+    ]);
     expect(resolved.paymentHistory.every((h) => h.wasLate)).toBe(true);
     expect(resolved.nextDue).toBe("2026-10-09"); // schedule untouched
+  });
+
+  test("resolving as paid never rewinds a later existing lastPaid", () => {
+    const ahead = reconcileBillOnOpen(
+      makeBill({ lastPaid: "2026-09-20" }),
+      TODAY,
+    );
+    const resolved = resolveBillMissedDates(
+      ahead,
+      ahead.unpaidDueDates,
+      "paid",
+      TODAY,
+    );
+
+    expect(resolved.lastPaid).toBe("2026-09-20");
   });
 
   test("resolving as skipped drops the dates without inventing payments", () => {

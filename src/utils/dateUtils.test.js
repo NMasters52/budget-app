@@ -18,6 +18,7 @@ import {
   validateBillInput,
   markBillAsPaid,
   getBillStatus,
+  buildUpdatedBill,
 } from "./dateUtils";
 
 describe("toISODate", () => {
@@ -261,5 +262,50 @@ describe("getBillStatus", () => {
 
     const nextWeek = { nextDue: "2026-09-18", lastPaid: "" };
     expect(getBillStatus(nextWeek, new Date(2026, 8, 10, 15, 30))).toBe("pending");
+  });
+});
+
+describe("buildUpdatedBill", () => {
+  // A bill that has been through reconciliation, so it carries the fields
+  // the edit form doesn't know about.
+  const bill = {
+    id: "b1",
+    title: "Gym",
+    amount: 30,
+    frequency: "monthly",
+    nextDue: "2026-10-09",
+    lastPaid: "2026-09-09",
+    originalDueDate: "2026-07-09",
+    previousDueDate: "2026-09-09",
+    unpaidDueDates: ["2026-09-09"],
+    paymentHistory: [{ date: "2026-09-09", amount: 30 }],
+  };
+
+  test("edited fields win", () => {
+    const updated = buildUpdatedBill(bill, { title: "Climbing", amount: 45 });
+
+    expect(updated.title).toBe("Climbing");
+    expect(updated.amount).toBe(45);
+    expect(updated.id).toBe("b1");
+  });
+
+  test("fields the form doesn't touch carry over untouched", () => {
+    const updated = buildUpdatedBill(bill, { title: "Gym" });
+
+    expect(updated.originalDueDate).toBe("2026-07-09");
+    expect(updated.previousDueDate).toBe("2026-09-09");
+    expect(updated.unpaidDueDates).toEqual(["2026-09-09"]);
+    expect(updated.paymentHistory).toEqual(bill.paymentHistory);
+  });
+
+  test("UI-only flags never reach storage", () => {
+    const updated = buildUpdatedBill(bill, {
+      title: "Gym",
+      isPaid: true,
+      autoCalculateDue: true,
+    });
+
+    expect(updated).not.toHaveProperty("isPaid");
+    expect(updated).not.toHaveProperty("autoCalculateDue");
   });
 });

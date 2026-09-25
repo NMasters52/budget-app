@@ -6,6 +6,7 @@ import {
   isValidFrequency,
   calculateNextDueFromFrequency,
   validateBillDates,
+  buildUpdatedBill,
 } from "../utils/dateUtils";
 import FrequencySelect from "./FrequencySelect";
 
@@ -100,11 +101,12 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
       return;
     }
 
-    let updatedBill = {
+    // Form fields win, everything else on the bill (originalDueDate,
+    // previousDueDate, unpaidDueDates) carries over untouched.
+    let updatedBill = buildUpdatedBill(bill, {
       ...formData,
       amount,
-      id: bill.id,
-    };
+    });
 
     if (formData.isPaid && (!bill.lastPaid || bill.lastPaid === "")) {
       const updatedBills = markBillAsPaid(bills, bill.id, new Date());

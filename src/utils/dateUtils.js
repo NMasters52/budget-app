@@ -656,12 +656,19 @@ export const getBillsNeedingReview = (bills) =>
 
 // Resolve missed due dates from the review sheet.
 //
-// resolveAs "paid": record one paymentHistory entry per date (marked late)
-// and bump lastPaid to the latest resolved date.
+// resolveAs "paid": record one paymentHistory entry per missed date (marked
+// late) and set lastPaid to the day you resolved, same rule as
+// markBillAsPaid: lastPaid is when money moved, each entry's originalDueDate
+// records the period it covered.
 // resolveAs "skipped": drop the dates without recording any payment.
 // nextDue is untouched in both cases: it already points at the next
 // upcoming date after reconciliation.
-export const resolveBillMissedDates = (bill, dates, resolveAs) => {
+export const resolveBillMissedDates = (
+  bill,
+  dates,
+  resolveAs,
+  resolvedOn = new Date(),
+) => {
   const resolving = new Set(dates);
   const unpaidDueDates = (bill.unpaidDueDates || []).filter(
     (date) => !resolving.has(date),
@@ -671,15 +678,18 @@ export const resolveBillMissedDates = (bill, dates, resolveAs) => {
     return { ...bill, unpaidDueDates };
   }
 
+  const resolvedISO = toISODate(resolvedOn);
   const history = dates.map((date) => ({
-    date,
+    date: resolvedISO,
     amount: bill.amount,
     wasLate: true,
     periodsMissed: 1,
     originalDueDate: date,
   }));
 
-  const candidates = bill.lastPaid ? [bill.lastPaid, ...dates] : dates;
+  const candidates = bill.lastPaid
+    ? [bill.lastPaid, resolvedISO]
+    : [resolvedISO];
   const lastPaid = candidates.reduce((a, b) =>
     parseLocalDate(a) >= parseLocalDate(b) ? a : b,
   );
@@ -701,12 +711,22 @@ export const resolveBillMissedDatesInList = (
   billId,
   dates,
   resolveAs,
+  resolvedOn = new Date(),
 ) =>
   bills.map((bill) =>
     bill.id === billId
-      ? resolveBillMissedDates(bill, dates, resolveAs)
+      ? resolveBillMissedDates(bill, dates, resolveAs, resolvedOn)
       : bill,
   );
+
+// Merge edit-form fields onto the existing bill. Form fields win; anything
+// the form doesn't know about (originalDueDate, previousDueDate,
+// unpaidDueDates) carries over untouched, and UI-only flags never reach
+// storage.
+export const buildUpdatedBill = (bill, formData) => {
+  const { isPaid: _isPaid, autoCalculateDue: _autoCalculateDue, ...formFields } = formData;
+  return { ...bill, ...formFields, id: bill.id };
+};
 
 export const validateAllBills = (bills) => {
   const results = bills.map(validateBill);

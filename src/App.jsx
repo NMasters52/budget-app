@@ -8,6 +8,7 @@ import DebtsTable from "./components/DebtsTable";
 import AddBills from "./services/AddBills";
 import AddDebt from "./services/AddDebt";
 import Nav from "./Nav";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 //utilities
 import {
@@ -113,7 +114,8 @@ const App = () => {
     <main className="bg-gray-100 min-h-screen flex flex-col">
       <Nav />
       <div className="flex-1">
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           <Route
             path="/"
             element={
@@ -138,7 +140,8 @@ const App = () => {
             path="/addDebt"
             element={<AddDebt debts={debts} setDebts={setDebts} />}
           />
-        </Routes>
+          </Routes>
+        </ErrorBoundary>
       </div>
       <footer className="bg-green-600 text-white text-center py-4 mt-auto">
         <p className="text-sm">Bill Buddy &copy; {new Date().getFullYear()}</p>
