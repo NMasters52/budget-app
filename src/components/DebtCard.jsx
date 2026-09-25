@@ -13,11 +13,14 @@ import {
   calculateDebtProgress,
   dueDayInMonth,
   formatDayOrdinal,
+  getMostRecentPayment,
   isPaidOff,
 } from "../utils/debtUtils";
+import { formatLocaleDate } from "../utils/dateUtils";
 
 const DebtCard = ({ debt, debts, setDebts }) => {
   const [activeModal, setActiveModal] = useState(null);
+  const lastPayment = getMostRecentPayment(debt);
 
   const paidOff = isPaidOff(debt);
   // A negative percentage is real: the balance grew past where tracking
@@ -94,6 +97,14 @@ const DebtCard = ({ debt, debts, setDebts }) => {
               </span>
             </span>
           )}
+          <span>
+            Last paid{" "}
+            <span className="text-gray-600 font-medium">
+              {lastPayment
+                ? `${formatCurrency(lastPayment.amount)} on ${formatLocaleDate(lastPayment.date)}`
+                : "never"}
+            </span>
+          </span>
           {debt.apr != null && (
             <span>
               APR:{" "}

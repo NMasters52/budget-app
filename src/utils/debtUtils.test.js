@@ -24,6 +24,7 @@ import {
   suggestedPayment,
   dueDayInMonth,
   formatDayOrdinal,
+  getMostRecentPayment,
   recordPayment,
   updateBalance,
   setCurrentTarget,
@@ -490,6 +491,41 @@ describe("recordPayment", () => {
     const cleared = recordPayment(afterTwo, "tiny", 0.1, "2026-09-11");
 
     expect(cleared[0].currentBalance).toBe(0);
+  });
+});
+
+describe("getMostRecentPayment", () => {
+  test("returns null for a debt with no payments", () => {
+    expect(getMostRecentPayment(makeDebt())).toBeNull();
+  });
+
+  test("returns null when payment history is missing entirely", () => {
+    expect(getMostRecentPayment(makeDebt({ paymentHistory: undefined }))).toBeNull();
+  });
+
+  test("returns the newest date, not the first entry", () => {
+    const older = { id: "p1", amount: 50, date: "2026-08-01" };
+    const newer = { id: "p2", amount: 150, date: "2026-09-20" };
+    const debt = makeDebt({ paymentHistory: [newer, older] });
+
+    expect(getMostRecentPayment(debt)).toBe(newer);
+  });
+
+  test("breaks same-date ties by keeping the later entry", () => {
+    const minimum = { id: "p1", amount: 50, date: "2026-09-20" };
+    const extra = { id: "p2", amount: 25, date: "2026-09-20" };
+    const debt = makeDebt({ paymentHistory: [minimum, extra] });
+
+    expect(getMostRecentPayment(debt)).toBe(extra);
+  });
+
+  test("skips payments without a usable date", () => {
+    const valid = { id: "p1", amount: 50, date: "2026-09-20" };
+    const debt = makeDebt({
+      paymentHistory: [{ id: "bad", amount: 10, date: "" }, valid],
+    });
+
+    expect(getMostRecentPayment(debt)).toBe(valid);
   });
 });
 

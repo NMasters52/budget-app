@@ -291,6 +291,33 @@ export function recordPayment(debts, debtId, amount, date) {
   });
 }
 
+// The newest payment for a debt, for the card's "last paid" line. Payments
+// can be backdated, so array order is not recency order: compare dates, and
+// break ties by array position so a second same-day payment wins. Returns
+// null when there is no usable history.
+export function getMostRecentPayment(debt) {
+  if (!Array.isArray(debt.paymentHistory)) {
+    return null;
+  }
+
+  let mostRecent = null;
+  let mostRecentTime = -Infinity;
+
+  for (const payment of debt.paymentHistory) {
+    const time = payment?.date ? new Date(payment.date).getTime() : NaN;
+    if (Number.isNaN(time)) {
+      continue;
+    }
+
+    if (time >= mostRecentTime) {
+      mostRecent = payment;
+      mostRecentTime = time;
+    }
+  }
+
+  return mostRecent;
+}
+
 // Manual reconciliation with the lender's real balance (interest, fees, new
 // spending). Sets the balance only; payment history is never touched.
 export function updateBalance(debts, debtId, newBalance) {
