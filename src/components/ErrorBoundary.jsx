@@ -50,13 +50,13 @@ class ErrorBoundary extends Component {
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <button
               onClick={this.handleReload}
-              className="cursor-pointer rounded-full border-2 border-[#1d1b16] bg-[#ff6b4a] px-4 py-2 font-extrabold text-white shadow-[3px_4px_0_#1d1b16] transition-all hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[3px] active:shadow-none"
+              className="cursor-pointer rounded-full border-2 border-[#1d1b16] bg-[#ff6b4a] px-4 py-2 font-extrabold text-white shadow-[3px_4px_0_#1d1b16] transition-[transform,box-shadow] hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20 active:translate-x-[2px] active:translate-y-[3px] active:shadow-none"
             >
               Reload
             </button>
             <button
               onClick={this.handleResetData}
-              className="cursor-pointer rounded-full border-2 border-[#1d1b16]/20 bg-white px-4 py-2 font-extrabold text-[#1d1b16] shadow-[3px_4px_0_rgba(29,27,22,0.12)] transition-all hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[3px] active:shadow-none"
+              className="cursor-pointer rounded-full border-2 border-[#1d1b16]/20 bg-white px-4 py-2 font-extrabold text-[#1d1b16] shadow-[3px_4px_0_rgba(29,27,22,0.12)] transition-[transform,box-shadow] hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20 active:translate-x-[2px] active:translate-y-[3px] active:shadow-none"
             >
               Clear saved data
             </button>

@@ -1,6 +1,7 @@
-const FrequencySelect = ({ value, onChange, className = "" }) => {
+const FrequencySelect = ({ id = "frequency", value, onChange, className = "" }) => {
   return (
     <select
+      id={id}
       name="frequency"
       value={value}
       onChange={onChange}

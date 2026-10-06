@@ -145,6 +145,7 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
     <form onSubmit={handleSubmit}>
       <Field label="Bill title" htmlFor="title">
         <input
+          id="title"
           type="text"
           name="title"
           value={formData.title}
@@ -156,7 +157,11 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
 
       <Field label="Bill amount" htmlFor="amount">
         <input
+          id="amount"
           type="number"
+          min="0.01"
+          step="0.01"
+          inputMode="decimal"
           name="amount"
           placeholder={bill.amount}
           value={formData.amount}
@@ -168,6 +173,7 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
 
       <Field label="Next billing date" htmlFor="nextDue">
         <input
+          id="nextDue"
           type="date"
           name="nextDue"
           placeholder={bill.nextDue}
@@ -180,6 +186,7 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
       <Field label="Last paid date" htmlFor="lastPaid">
         <div className="flex gap-2">
           <input
+            id="lastPaid"
             type="date"
             name="lastPaid"
             placeholder={bill.lastPaid}
@@ -205,6 +212,7 @@ const EditModal = ({ bill, bills, onSave, onClose }) => {
 
       <Field label="Bill frequency" htmlFor="frequency">
         <FrequencySelect
+          id="frequency"
           value={formData.frequency}
           onChange={handleChange}
           className={`${inputClass} cursor-pointer`}

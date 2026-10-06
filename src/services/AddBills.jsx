@@ -1,43 +1,38 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  getTodayISODate,
   calculateNextDueFromFrequency,
+  getTodayISODate,
   reconcileBillOnOpen,
   validateBillInput,
 } from "../utils/dateUtils";
 import FrequencySelect from "../components/FrequencySelect";
-
-//design system
-import { CandyButton, Field, PageHeading, StickerCard } from "../components/ui";
+import { CandyButton, Field } from "../components/ui";
 import { inputClass } from "../components/uiClasses";
 
-const AddBills = ({ setBills }) => {
-  const [success, setSuccess] = useState(false);
+const emptyForm = {
+  title: "",
+  amount: "",
+  frequency: "monthly",
+  nextDue: "",
+  lastPaid: "",
+  paymentHistory: [],
+  autoCalculateDue: true,
+};
+
+const AddBills = ({ setBills, onAdded, onCancel }) => {
   const [error, setError] = useState("");
+  const [formData, setFormData] = useState(emptyForm);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    amount: 0,
-    frequency: "monthly",
-    nextDue: "",
-    lastPaid: "",
-    paymentHistory: [],
-    autoCalculateDue: true,
-  });
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
     const updatedFormData = {
       ...formData,
-      [name]: newValue,
+      [name]: type === "checkbox" ? checked : value,
     };
 
-    // Auto-calculate nextDue when lastPaid or frequency changes and autoCalculateDue is true
     if (
-      formData.autoCalculateDue &&
+      updatedFormData.autoCalculateDue &&
       (name === "lastPaid" || name === "frequency") &&
       updatedFormData.lastPaid &&
       updatedFormData.frequency
@@ -47,8 +42,8 @@ const AddBills = ({ setBills }) => {
           updatedFormData.lastPaid,
           updatedFormData.frequency,
         );
-      } catch (error) {
-        console.error("Error auto-calculating nextDue:", error);
+      } catch (calculationError) {
+        console.error("Error auto-calculating next due date:", calculationError);
       }
     }
 
@@ -56,8 +51,8 @@ const AddBills = ({ setBills }) => {
     setError("");
   };
 
-  const submitNewBill = (e) => {
-    e.preventDefault();
+  const submitNewBill = (event) => {
+    event.preventDefault();
 
     const inputBill = {
       ...formData,
@@ -69,7 +64,6 @@ const AddBills = ({ setBills }) => {
 
     if (!validation.isValid) {
       setError(validation.errors.join(" "));
-      setSuccess(false);
       return;
     }
 
@@ -83,145 +77,129 @@ const AddBills = ({ setBills }) => {
     };
     const reconciledBill = reconcileBillOnOpen(newBill);
     setBills((currentBills) => [...currentBills, reconciledBill]);
-    setFormData({
-      title: "",
-      amount: 0,
-      frequency: "monthly",
-      nextDue: "",
-      lastPaid: "",
-      paymentHistory: [],
-      autoCalculateDue: true,
-    });
+    setFormData(emptyForm);
     setError("");
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
+    onAdded?.(reconciledBill);
   };
 
   return (
-    <div className="mx-auto max-w-xl px-4 pt-10 pb-16">
-      <PageHeading
-        kicker="New entry"
-        title="Add a bill"
-        sub="Recurring costs live here; the schedule keeps itself up to date."
-      />
+    <form onSubmit={submitNewBill} autoComplete="off">
+      {error && (
+        <div
+          className="mb-4 rounded-2xl border-2 border-[#ff6b4a] bg-[#ff6b4a]/10 px-4 py-3 text-sm font-bold text-[#a83a1c]"
+          role="alert"
+          aria-live="polite"
+        >
+          {error}
+        </div>
+      )}
 
-      <StickerCard className="mt-6">
-        <form onSubmit={submitNewBill}>
-          {error && (
-            <div
-              className="mb-4 rounded-2xl border-2 border-[#ff6b4a] bg-[#ff6b4a]/10 px-4 py-3 text-sm font-bold text-[#a83a1c]"
-              role="alert"
+      <Field label="Bill title" htmlFor="bill-title">
+        <input
+          id="bill-title"
+          type="text"
+          name="title"
+          required
+          value={formData.title}
+          placeholder="Rent…"
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </Field>
+
+      <Field label="Bill amount" htmlFor="bill-amount">
+        <input
+          id="bill-amount"
+          type="number"
+          name="amount"
+          required
+          min="0.01"
+          step="0.01"
+          inputMode="decimal"
+          value={formData.amount}
+          onChange={handleChange}
+          onWheel={(event) => event.currentTarget.blur()}
+          className={inputClass}
+        />
+      </Field>
+
+      <Field label="Next billing date" htmlFor="bill-next-due">
+        <input
+          id="bill-next-due"
+          type="date"
+          name="nextDue"
+          required
+          value={formData.nextDue}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </Field>
+
+      <Field
+        label="Last paid date"
+        htmlFor="bill-last-paid"
+        hint="Optional. This date can set the next due date."
+      >
+        <div className="flex gap-2">
+          <input
+            id="bill-last-paid"
+            type="date"
+            name="lastPaid"
+            value={formData.lastPaid}
+            onChange={handleChange}
+            max={getTodayISODate()}
+            className={inputClass}
+          />
+          {formData.lastPaid && (
+            <button
+              type="button"
+              onClick={() =>
+                handleChange({ target: { name: "lastPaid", value: "", type: "date" } })
+              }
+              className="shrink-0 cursor-pointer rounded-xl border-2 border-[#ff6b4a]/40 bg-white px-4 font-extrabold text-[#d64522] transition-colors hover:border-[#ff6b4a] focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20"
             >
-              {error}
-            </div>
+              Clear
+            </button>
           )}
+        </div>
+      </Field>
 
-          {success && (
-            <div className="mb-4 rounded-2xl border-2 border-[#2aa8a0] bg-[#2aa8a0]/10 px-4 py-3 text-sm font-bold text-[#1d7d77]">
-              <span className="mr-1 inline-block animate-pop">✓</span> Bill
-              added
-            </div>
-          )}
+      <Field label="Bill frequency" htmlFor="bill-frequency">
+        <FrequencySelect
+          id="bill-frequency"
+          value={formData.frequency}
+          onChange={handleChange}
+          className={`${inputClass} cursor-pointer`}
+        />
+      </Field>
 
-          <Field label="Bill title" htmlFor="title">
-            <input
-              type="text"
-              name="title"
-              required
-              value={formData.title}
-              placeholder="Rent"
-              onChange={(e) => handleChange(e)}
-              className={inputClass}
-            />
-          </Field>
+      <label className="mb-5 flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] px-4 py-3">
+        <input
+          type="checkbox"
+          name="autoCalculateDue"
+          checked={formData.autoCalculateDue}
+          onChange={handleChange}
+          className="h-5 w-5 shrink-0 accent-[#ff6b4a]"
+        />
+        <span className="text-sm font-bold text-[#1d1b16]">
+          Set the next due date automatically
+          <span className="block text-[13px] font-semibold text-[#6f6b61]">
+            Uses the last paid date and frequency.
+          </span>
+        </span>
+      </label>
 
-          <Field label="Bill amount" htmlFor="amount">
-            <input
-              type="number"
-              name="amount"
-              required
-              min="0.01"
-              step="0.01"
-              inputMode="decimal"
-              value={formData.amount}
-              onChange={(e) => handleChange(e)}
-              onWheel={(e) => e.target.blur()}
-              className={inputClass}
-            />
-          </Field>
-
-          <Field label="Next billing date" htmlFor="nextDue">
-            <input
-              type="date"
-              name="nextDue"
-              required
-              value={formData.nextDue}
-              onChange={(e) => handleChange(e)}
-              className={inputClass}
-            />
-          </Field>
-
-          <Field
-            label="Last paid date"
-            htmlFor="lastPaid"
-            hint="Optional — powers the auto-calculated next due date."
-          >
-            <div className="flex gap-2">
-              <input
-                type="date"
-                name="lastPaid"
-                value={formData.lastPaid}
-                onChange={(e) => handleChange(e)}
-                max={getTodayISODate()}
-                className={inputClass}
-              />
-              {formData.lastPaid && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleChange({ target: { name: "lastPaid", value: "" } })
-                  }
-                  className="shrink-0 cursor-pointer rounded-xl border-2 border-[#ff6b4a]/40 bg-white px-4 font-extrabold text-[#d64522] transition-colors hover:border-[#ff6b4a]"
-                  title="Clear date"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          </Field>
-
-          <Field label="Bill frequency" htmlFor="frequency">
-            <FrequencySelect
-              value={formData.frequency}
-              onChange={handleChange}
-              className={`${inputClass} cursor-pointer`}
-            />
-          </Field>
-
-          <label className="mb-5 flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-[#1d1b16]/10 bg-[#faf8f2] px-4 py-3">
-            <input
-              type="checkbox"
-              name="autoCalculateDue"
-              checked={formData.autoCalculateDue}
-              onChange={handleChange}
-              className="h-5 w-5 shrink-0 accent-[#ff6b4a]"
-            />
-            <span className="text-sm font-bold text-[#1d1b16]">
-              Auto-calculate next due date
-              <span className="block text-[13px] font-semibold text-[#6f6b61]">
-                Derives it from the last paid date and frequency.
-              </span>
-            </span>
-          </label>
-
-          <CandyButton type="submit" tone="coral" size="lg" className="w-full">
-            Add bill
+      <div className="flex flex-col gap-2">
+        <CandyButton type="submit" tone="coral" size="lg" className="w-full">
+          Add bill
+        </CandyButton>
+        {onCancel && (
+          <CandyButton tone="ghost" size="md" className="w-full" onClick={onCancel}>
+            Cancel
           </CandyButton>
-        </form>
-      </StickerCard>
-    </div>
+        )}
+      </div>
+    </form>
   );
 };
 

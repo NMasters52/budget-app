@@ -185,9 +185,56 @@ export const validateBillInput = (bill, today = new Date()) => {
 
 // Sum of bill amounts as a number. Amounts can arrive as strings when a form
 // input value is saved without coercion; adding a string onto the running
-// total produces a string, whose .toFixed call then crashes the Bills Preview.
+// total produces a string, whose .toFixed call then crashes bill summaries.
 export const calculateBillsTotal = (bills) =>
   bills.reduce((total, bill) => total + Number(bill.amount), 0);
+
+const nextOccurrence = (date, frequency) => {
+  switch (frequency) {
+    case "weekly":
+      return addDays(date, 7);
+    case "biweekly":
+      return addDays(date, 14);
+    case "monthly":
+      return addMonths(date, 1);
+    case "quarterly":
+      return addMonths(date, 3);
+    case "biannually":
+      return addMonths(date, 6);
+    case "yearly":
+      return addMonths(date, 12);
+    default:
+      return null;
+  }
+};
+
+export const calculateDueWithinDays = (bills, today, numberOfDays) => {
+  const start = parseLocalDate(toISODate(today));
+  const end = addDays(start, numberOfDays - 1);
+
+  return bills.reduce((total, bill) => {
+    if (!isValidISODate(bill.nextDue)) return total;
+
+    let due = parseLocalDate(bill.nextDue);
+    let occurrences = 0;
+    let billTotal = 0;
+
+    while (due < start && occurrences < 1000) {
+      due = nextOccurrence(due, bill.frequency);
+      if (!due) return total;
+      occurrences += 1;
+    }
+
+    while (due <= end && occurrences < 1000) {
+      billTotal += Number(bill.amount);
+      due = nextOccurrence(due, bill.frequency);
+      if (!due) break;
+      occurrences += 1;
+    }
+
+    return total + billTotal;
+  }, 0);
+};
 
 //helps calculate total bills for the year
 export const calculateYearlyTotal = (bills) => {

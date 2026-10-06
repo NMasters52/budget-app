@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { IoAdd } from "react-icons/io5";
 
 //components
+import AddDebt from "../services/AddDebt";
 import DebtsFilter from "./DebtsFilter";
 import DebtCard from "./DebtCard";
 
 //design system
-import { Meter, PageHeading, Sticker, StickerCard } from "./ui";
-import { candyClasses } from "./uiClasses";
+import { CandyButton, Meter, ModalShell, PageHeading, Sticker, StickerCard } from "./ui";
 
 //helper functions
 import {
@@ -22,6 +22,15 @@ import {
 
 const DebtsTable = ({ debts = [], setDebts }) => {
   const [filter, setFilter] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const addOpen = searchParams.get("add") === "1";
+
+  const setAddOpen = (open) => {
+    const next = new URLSearchParams(searchParams);
+    if (open) next.set("add", "1");
+    else next.delete("add");
+    setSearchParams(next, { replace: true });
+  };
 
   const totals = useMemo(() => calculateDebtTotals(debts), [debts]);
 
@@ -35,21 +44,57 @@ const DebtsTable = ({ debts = [], setDebts }) => {
   // The payoff percentage is a ratio, so clamp the bar width against bad data.
   const progressWidth = Math.min(100, Math.max(0, totals.payoffPercentage));
 
+  const pageHeader = (
+    <header className="flex flex-wrap items-center justify-between gap-4">
+      <PageHeading
+        title="Debts"
+        sub={
+          debts.length === 0
+            ? "Add a debt to start a payoff plan."
+            : `${totals.payoffDebtCount - totals.debtsPaidOff} still going, ${totals.debtsPaidOff} paid off`
+        }
+      />
+      <button
+        type="button"
+        onClick={() => setAddOpen(true)}
+        className="inline-flex cursor-pointer touch-manipulation items-center justify-center gap-1.5 rounded-full border-2 border-[#1d1b16] bg-[#ff6b4a] px-4 py-2 text-sm font-extrabold text-white shadow-[3px_4px_0_#1d1b16] transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-[4px_5px_0_rgba(29,27,22,0.45)] focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20"
+      >
+        <IoAdd aria-hidden="true" /> Add debt
+      </button>
+    </header>
+  );
+
+  const addDebtModal = addOpen ? (
+    <ModalShell title="Add debt" onClose={() => setAddOpen(false)} wide>
+      <AddDebt
+        setDebts={setDebts}
+        onAdded={() => setAddOpen(false)}
+        onCancel={() => setAddOpen(false)}
+      />
+    </ModalShell>
+  ) : null;
+
+  if (debts.length === 0) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 pt-10 pb-16">
+        {pageHeader}
+        <div className="mt-8 rounded-[28px] border-2 border-dashed border-[#c9c4b8] bg-white/70 p-10 text-center">
+          <p className="font-display text-xl font-bold">No debts yet</p>
+          <p className="mt-1 text-sm font-semibold text-[#6f6b61]">
+            Add your first balance to track payments and payoff progress.
+          </p>
+          <CandyButton tone="teal" size="md" className="mt-4" onClick={() => setAddOpen(true)}>
+            Add debt
+          </CandyButton>
+        </div>
+        {addDebtModal}
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 pt-10 pb-16">
-      {/* Page header */}
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <PageHeading
-          kicker="Payoff plan"
-          title="Debts"
-          sub={`${totals.payoffDebtCount - totals.debtsPaidOff} still going · ${
-            totals.debtsPaidOff
-          } paid off`}
-        />
-        <Link to="/addDebt" className={candyClasses("coral", "md")}>
-          <IoAdd aria-hidden="true" /> Add debt
-        </Link>
-      </header>
+      {pageHeader}
 
       {/* Primary payoff metrics */}
       <StickerCard className="mt-6">
@@ -149,17 +194,7 @@ const DebtsTable = ({ debts = [], setDebts }) => {
       <DebtsFilter filter={filter} setFilter={setFilter} />
 
       {/* Debt list */}
-      {debts.length === 0 ? (
-        <div className="mt-4 rounded-[28px] border-2 border-dashed border-[#c9c4b8] bg-white/60 p-10 text-center">
-          <p className="font-display text-lg font-bold">No debts to show</p>
-          <p className="mt-1 text-sm font-semibold text-[#6f6b61]">
-            Add your first debt to start the payoff plan.
-          </p>
-          <Link to="/addDebt" className={`${candyClasses("teal", "md")} mt-4`}>
-            Add a debt
-          </Link>
-        </div>
-      ) : visible.length === 0 ? (
+      {visible.length === 0 ? (
         <div className="mt-4 rounded-[28px] border-2 border-dashed border-[#c9c4b8] bg-white/60 p-10 text-center">
           <p className="font-display text-lg font-bold">
             No debts match this filter
@@ -177,6 +212,7 @@ const DebtsTable = ({ debts = [], setDebts }) => {
           ))}
         </div>
       )}
+      {addDebtModal}
     </div>
   );
 };

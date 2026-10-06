@@ -8,6 +8,7 @@
   /* Motion shared across the app */
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-result-reveal: result-reveal 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   @keyframes rise {
     from {
@@ -31,6 +32,17 @@
       transform: scale(1);
     }
   }
+
+  @keyframes result-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.99);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }
 
 /* Dot-grid paper: the app-wide background. Laid on <main> in App.jsx. */
@@ -43,4 +55,23 @@
 ::selection {
   background-color: #ffd9cd;
   color: #1d1b16;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
