@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 
 //design system classes
 import { candyClasses, labelClass } from "./uiClasses";
@@ -90,7 +91,7 @@ export const Meter = ({
       aria-valuemax={100}
     >
       <div
-        className={`h-full rounded-full transition-all ${tones[tone]}`}
+        className={`h-full rounded-full transition-[width] ${tones[tone]}`}
         style={{ width: `${width}%` }}
       />
     </div>
@@ -104,7 +105,7 @@ export const PageHeading = ({ kicker, title, sub }) => (
         {kicker}
       </p>
     )}
-    <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-[#1d1b16]">
+    <h1 className="mt-1 text-balance font-display text-4xl font-bold tracking-tight text-[#1d1b16]">
       {title}
     </h1>
     {sub && <p className="mt-1 text-[#6f6b61]">{sub}</p>}
@@ -113,35 +114,77 @@ export const PageHeading = ({ kicker, title, sub }) => (
 
 // Shared modal frame: dark backdrop (click to close), sticker panel, title
 // row with a close chip, Escape to close. Forms render inside as children.
+// Portals to document.body so callers may mount it inside cards whose
+// transform (animate-rise, hover:-translate-y-*) would otherwise become the
+// containing block for position:fixed and trap the modal in the card's
+// stacking context (painted over by the next sibling card).
 export const ModalShell = ({ title, onClose, children, wide = false }) => {
+  const titleId = useId();
+  const dialogRef = useRef(null);
+
   useEffect(() => {
+    const previouslyFocused = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const onKeyDown = (event) => {
       if (event.key === "Escape") onClose();
+
+      if (event.key === "Tab" && dialogRef.current) {
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll(
+            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ),
+        );
+
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     };
+
+    const firstFocusable = dialogRef.current?.querySelector(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]',
+    );
+    firstFocusable?.focus();
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus?.();
+    };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50">
-      <div
+      <button
+        type="button"
+        aria-label={`Close ${title}`}
         className="absolute inset-0 bg-[#1d1b16]/40"
         onClick={onClose}
-        aria-hidden="true"
       />
       <div className="relative flex min-h-full items-center justify-center p-4">
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
-          aria-label={title}
-          className={`animate-rise max-h-[88vh] w-full overflow-y-auto rounded-[28px] border-2 border-[#1d1b16] bg-white p-6 shadow-[8px_10px_0_rgba(29,27,22,0.25)] ${
+          aria-labelledby={titleId}
+          className={`animate-rise max-h-[88vh] w-full overscroll-contain overflow-y-auto rounded-[28px] border-2 border-[#1d1b16] bg-white p-6 shadow-[8px_10px_0_rgba(29,27,22,0.25)] ${
             wide ? "max-w-lg" : "max-w-md"
           }`}
         >
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="font-display text-xl font-bold text-[#1d1b16]">
+            <h2 id={titleId} className="font-display text-xl font-bold text-[#1d1b16]">
               {title}
-            </h3>
+            </h2>
             <button
               type="button"
               onClick={onClose}
@@ -154,6 +197,7 @@ export const ModalShell = ({ title, onClose, children, wide = false }) => {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

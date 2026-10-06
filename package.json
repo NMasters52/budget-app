@@ -8,8 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "vitest run",
-    "preview": "vite preview",
-    "seed": "node scripts/seed.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^19.1.1",
