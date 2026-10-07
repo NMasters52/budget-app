@@ -57,7 +57,7 @@ const DebtsTable = ({ debts = [], setDebts }) => {
       <button
         type="button"
         onClick={() => setAddOpen(true)}
-        className="inline-flex cursor-pointer touch-manipulation items-center justify-center gap-1.5 rounded-full border-2 border-[#1d1b16] bg-[#ff6b4a] px-4 py-2 text-sm font-extrabold text-white shadow-[3px_4px_0_#1d1b16] transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-[4px_5px_0_rgba(29,27,22,0.45)] focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20"
+        className="inline-flex cursor-pointer touch-manipulation items-center justify-center gap-1.5 rounded-full border-2 border-[#1d1b16] bg-[#ff6b4a] px-4 py-2 text-sm font-extrabold text-white shadow-[3px_4px_0_#1d1b16] transition-[transform,box-shadow] duration-150 hover:shadow-[3px_4px_0_rgba(29,27,22,0.45)] focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20"
       >
         <IoAdd aria-hidden="true" /> Add debt
       </button>

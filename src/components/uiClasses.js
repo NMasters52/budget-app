@@ -23,7 +23,7 @@ export const candyClasses = (tone = "coral", size = "md") =>
     "inline-flex items-center justify-center gap-1.5 rounded-full border-2 font-extrabold",
     "cursor-pointer touch-manipulation select-none transition-[transform,box-shadow,background-color,border-color,color,opacity] duration-150",
     "focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20 focus-visible:ring-offset-2",
-    "hover:-translate-y-0.5 hover:shadow-[4px_5px_0_rgba(29,27,22,0.45)]",
+    "hover:shadow-[3px_4px_0_rgba(29,27,22,0.45)]",
     "active:translate-x-[2px] active:translate-y-[3px] active:shadow-none",
     "disabled:cursor-default disabled:opacity-40 disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0",
     CANDY_SIZES[size],

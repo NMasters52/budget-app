@@ -30,10 +30,10 @@ const STICKER_TONES = {
   ink: "border-[#1d1b16] bg-[#1d1b16] text-white",
 };
 
-// The tilted pill. Status chips, page kickers, little labels.
+// The status pill. Status chips, page kickers, little labels.
 export const Sticker = ({ tone = "slate", className = "", children }) => (
   <span
-    className={`inline-flex shrink-0 -rotate-2 items-center gap-1 rounded-full border-2 px-2.5 py-0.5 text-[11px] font-extrabold ${STICKER_TONES[tone]} ${className}`}
+    className={`inline-flex shrink-0 items-center gap-1 rounded-full border-2 px-2.5 py-0.5 text-[11px] font-extrabold ${STICKER_TONES[tone]} ${className}`}
   >
     {children}
   </span>
