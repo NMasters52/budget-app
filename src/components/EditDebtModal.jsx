@@ -5,8 +5,6 @@ import {
   DEBT_TYPE_LABELS,
   validateDebtInput,
   updateDebt,
-  setCurrentTarget,
-  clearCurrentTarget,
 } from "../utils/debtUtils";
 
 //design system
@@ -15,11 +13,9 @@ import { inputClass } from "./uiClasses";
 
 // Overlay for editing a debt's record. Changing the starting balance is
 // flagged in the form because payoff progress is calculated against it.
-//
-// The current-target select only offers to move the target to another
-// eligible debt or clear it; the debt being edited never appears as a
-// destination. updateDebt already strips the target when the debt leaves
-// the payoff goal or reaches zero, so this component does not repeat that.
+// The payoff target is NOT chosen here; it lives in a selector on the
+// Debts page. updateDebt still strips the target when the debt leaves
+// the payoff goal or reaches zero.
 const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
   const [formData, setFormData] = useState({
     name: debt.name,
@@ -35,9 +31,6 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
     apr: debt.apr == null ? "" : debt.apr,
     includeInPayoffGoal: debt.includeInPayoffGoal,
   });
-  const [targetSelection, setTargetSelection] = useState(
-    debt.isCurrentTarget ? debt.id : "",
-  );
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -50,15 +43,6 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
     });
     setError("");
   };
-
-  // Other debts eligible to hold the target: in the payoff goal with a
-  // balance left. The edited debt only shows here as its own selection.
-  const targetOptions = debts.filter(
-    (candidate) =>
-      candidate.id !== debt.id &&
-      candidate.includeInPayoffGoal &&
-      candidate.currentBalance > 0,
-  );
 
   const startingBalanceChanged =
     Number(formData.startingBalance) !== debt.startingBalance;
@@ -88,15 +72,7 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
       includeInPayoffGoal: formData.includeInPayoffGoal,
     };
 
-    let next = updateDebt(debts, debt.id, updates);
-
-    if (targetSelection === "" && debt.isCurrentTarget) {
-      next = clearCurrentTarget(next);
-    } else if (targetSelection && targetSelection !== debt.id) {
-      next = setCurrentTarget(next, targetSelection);
-    }
-
-    setDebts(next);
+    setDebts(updateDebt(debts, debt.id, updates));
     onClose();
   };
 
@@ -265,26 +241,6 @@ const EditDebtModal = ({ debt, debts, setDebts, onClose }) => {
             Include in payoff goal
           </span>
         </label>
-
-        <Field label="Current target" htmlFor="debt-target">
-          <select
-            name="targetSelection"
-            id="debt-target"
-            value={targetSelection}
-            onChange={(e) => setTargetSelection(e.target.value)}
-            className={`${inputClass} cursor-pointer`}
-          >
-            <option value="">No current target</option>
-            {debt.isCurrentTarget && (
-              <option value={debt.id}>{debt.name}</option>
-            )}
-            {targetOptions.map((candidate) => (
-              <option key={candidate.id} value={candidate.id}>
-                {candidate.name}
-              </option>
-            ))}
-          </select>
-        </Field>
 
         <div className="mt-4 flex flex-col gap-2">
           <CandyButton type="submit" tone="teal" size="lg" className="w-full">

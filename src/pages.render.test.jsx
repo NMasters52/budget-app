@@ -180,6 +180,12 @@ describe("restyled pages render", () => {
     expect(html).toContain("Payoff goal");
     expect(html).toContain("Visa");
     expect(html).toContain("Current target");
+    // The payoff target is chosen by a page-level selector, not in the
+    // per-debt edit form.
+    expect(html).toContain('id="payoffTarget"');
+    expect(html).toContain(">No current target</option>");
+    expect(html).toContain(">Visa</option>");
+    expect(html).not.toContain('id="debt-target"'); // old in-modal select is gone
   });
 
   it("debts renders a direct empty state", () => {

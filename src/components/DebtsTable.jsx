@@ -18,7 +18,12 @@ import {
   formatDayOrdinal,
   filterDebts,
   sortDebts,
+  setCurrentTarget,
+  clearCurrentTarget,
 } from "../utils/debtUtils";
+
+//design system classes
+import { inputClass, labelClass } from "./uiClasses";
 
 const DebtsTable = ({ debts = [], setDebts }) => {
   const [filter, setFilter] = useState("all");
@@ -40,6 +45,19 @@ const DebtsTable = ({ debts = [], setDebts }) => {
   );
 
   const target = debts.find((debt) => debt.isCurrentTarget);
+
+  // The payoff target is picked here on the page, never inside a card's
+  // edit form. Candidates mirror setCurrentTarget's own guard: in the
+  // payoff goal with a balance left.
+  const targetCandidates = debts.filter(
+    (debt) => debt.includeInPayoffGoal && debt.currentBalance > 0,
+  );
+
+  const handleTargetChange = (debtId) => {
+    setDebts(
+      debtId === "" ? clearCurrentTarget(debts) : setCurrentTarget(debts, debtId),
+    );
+  };
 
   // The payoff percentage is a ratio, so clamp the bar width against bad data.
   const progressWidth = Math.min(100, Math.max(0, totals.payoffPercentage));
@@ -164,31 +182,51 @@ const DebtsTable = ({ debts = [], setDebts }) => {
         </span>
       </div>
 
-      {/* Current payoff target */}
-      {target ? (
-        <StickerCard tone="mango" className="mt-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <Sticker tone="ink">Current target</Sticker>
-              <p className="mt-2 font-display text-xl font-bold text-[#1d1b16]">
-                {target.name}
-              </p>
-              {dueDayInMonth(target, new Date()) != null && (
-                <p className="text-sm font-semibold text-[#6f6b61]">
-                  Minimum {formatCurrency(target.minimumPayment)} · due on the{" "}
-                  {formatDayOrdinal(dueDayInMonth(target, new Date()))}
-                </p>
-              )}
-            </div>
-            <span className="font-display text-lg font-bold tabular-nums whitespace-nowrap text-[#1d1b16]">
-              {formatCurrency(target.currentBalance)} remaining
-            </span>
-          </div>
-        </StickerCard>
-      ) : (
+      {/* Current payoff target: picked with this selector, not per card */}
+      {targetCandidates.length === 0 ? (
         <p className="mt-4 rounded-[24px] border-2 border-dashed border-[#c9c4b8] bg-white/60 px-5 py-4 text-center text-sm font-semibold text-[#6f6b61]">
-          No target selected. Choose one with Edit on a debt card.
+          No debts in the payoff goal yet, so there is nothing to target.
         </p>
+      ) : (
+        <StickerCard tone={target ? "mango" : "default"} className="mt-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <label htmlFor="payoffTarget" className={`${labelClass} mb-1.5`}>
+              Current target
+            </label>
+            <select
+              id="payoffTarget"
+              value={target?.id ?? ""}
+              onChange={(e) => handleTargetChange(e.target.value)}
+              className={`${inputClass} w-full cursor-pointer sm:w-64`}
+            >
+              <option value="">No current target</option>
+              {targetCandidates.map((candidate) => (
+                <option key={candidate.id} value={candidate.id}>
+                  {candidate.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {target && (
+            <div className="mt-3 flex items-start justify-between gap-4">
+              <div>
+                <Sticker tone="ink">Current target</Sticker>
+                <p className="mt-2 font-display text-xl font-bold text-[#1d1b16]">
+                  {target.name}
+                </p>
+                {dueDayInMonth(target, new Date()) != null && (
+                  <p className="text-sm font-semibold text-[#6f6b61]">
+                    Minimum {formatCurrency(target.minimumPayment)} · due on the{" "}
+                    {formatDayOrdinal(dueDayInMonth(target, new Date()))}
+                  </p>
+                )}
+              </div>
+              <span className="font-display text-lg font-bold tabular-nums whitespace-nowrap text-[#1d1b16]">
+                {formatCurrency(target.currentBalance)} remaining
+              </span>
+            </div>
+          )}
+        </StickerCard>
       )}
 
       <DebtsFilter filter={filter} setFilter={setFilter} />
