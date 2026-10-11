@@ -256,6 +256,58 @@ describe("getBillStatus", () => {
     expect(getBillStatus(bill, new Date(2026, 8, 10, 15, 30))).toBe("due_soon");
   });
 
+  // Sweep calendar dates rather than depend on the date the test is run.
+  // 2024 includes leap day; 2026 includes the reported October 11 case.
+  test.each(["weekly", "biweekly", "monthly", "quarterly", "biannually", "yearly"])(
+    "%s due-day payment regression across calendar dates",
+    (frequency) => {
+      for (const year of [2024, 2026]) {
+        for (let due = new Date(year, 0, 1); due.getFullYear() === year; due.setDate(due.getDate() + 1)) {
+          const date = toISODate(due);
+          const previous = new Date(due);
+          previous.setDate(previous.getDate() - 1);
+          const anchor = new Date(due);
+          const daysPerPeriod = frequency === "weekly" ? 7 : frequency === "biweekly" ? 14 : null;
+          if (daysPerPeriod) anchor.setDate(anchor.getDate() - daysPerPeriod);
+          const bill = {
+            id: "recurring", amount: 200, frequency,
+            nextDue: date, originalDueDate: toISODate(anchor),
+            lastPaid: toISODate(previous), unpaidDueDates: [],
+            paymentHistory: [{ date: toISODate(previous), amount: 200, wasLate: true }],
+          };
+          const context = `${frequency} due ${date}`;
+
+          // These statuses control whether the UI enables Pay.
+          for (const hour of [0, 13, 23]) {
+            const now = new Date(due);
+            now.setHours(hour, 30);
+            expect(getBillStatus(bill, now), context).toBe("due_soon");
+          }
+          const tomorrow = new Date(due);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          expect(getBillStatus(bill, tomorrow), context).toBe("overdue");
+
+          const [paid] = markBillAsPaid([bill], bill.id, due);
+          expect(paid.nextDue, context).toBeTruthy();
+          expect(paid.nextDue > date, context).toBe(true);
+          if (daysPerPeriod) {
+            const expected = new Date(due);
+            expected.setDate(expected.getDate() + daysPerPeriod);
+            expect(paid.nextDue, context).toBe(toISODate(expected));
+          }
+          expect(paid.lastPaid, context).toBe(date);
+          expect(paid.paymentHistory, context).toHaveLength(2);
+          expect(paid.paymentHistory[1], context).toEqual({
+            date, amount: 200, wasLate: false, periodsMissed: 0,
+            originalDueDate: date,
+          });
+          expect(getBillStatus(paid, due), context).toBe("paid");
+          expect(getBillStatus(paid, parseLocalDate(paid.nextDue)), context).toBe("due_soon");
+        }
+      }
+    },
+  );
+
   test("the due_soon window covers 7 calendar days, then it is pending", () => {
     const thisWeek = { nextDue: "2026-09-17", lastPaid: "" };
     expect(getBillStatus(thisWeek, new Date(2026, 8, 10, 15, 30))).toBe("due_soon");

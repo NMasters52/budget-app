@@ -479,11 +479,11 @@ export const markBillAsPaid = (bills, billId, paidDate = new Date()) => {
           bill.frequency,
         );
 
-        // Calculate new due date: baseDate + (periodsPassed + 1) periods
-        // This ensures the original day is preserved (e.g., 5th of month)
-        const newDueDate = calculateNextDueFromDate(
+        // Advance beyond this payment using the original schedule anchor.
+        // Counting from nextDue but adding to an older anchor can rewind it.
+        const newDueDate = calculateNextAnchoredDueDate(
+          paidDateString,
           baseDate,
-          periodsPassed + 1,
           bill.frequency,
         );
 
@@ -819,7 +819,9 @@ export const getBillStatus = (bill, today = null) => {
     return "overdue";
   }
 
-  if (isBillPaidThisPeriod(bill, monthStart, monthEnd)) {
+  // An earlier payment only keeps the bill paid until its next due date.
+  // Weekly bills can have several payable occurrences in the same month.
+  if (nextDue > todaysDate && isBillPaidThisPeriod(bill, monthStart, monthEnd)) {
     const lastPayment = bill.paymentHistory?.[bill.paymentHistory.length - 1];
     if (lastPayment?.wasLate) {
       return "paid_late";
