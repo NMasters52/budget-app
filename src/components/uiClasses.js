@@ -7,6 +7,7 @@ const CANDY_TONES = {
   ink: "border-[#1d1b16] bg-[#1d1b16] text-white shadow-[3px_4px_0_rgba(29,27,22,0.35)]",
   mango:
     "border-[#1d1b16] bg-[#ffb01f] text-[#1d1b16] shadow-[3px_4px_0_#1d1b16]",
+  paid: "border-[#16847d] bg-[#e9f6f4] text-[#116b65] shadow-none",
   ghost:
     "border-[#1d1b16]/20 bg-white text-[#1d1b16] shadow-[3px_4px_0_rgba(29,27,22,0.12)]",
 };
@@ -25,7 +26,8 @@ export const candyClasses = (tone = "coral", size = "md") =>
     "focus-visible:ring-4 focus-visible:ring-[#ff6b4a]/20 focus-visible:ring-offset-2",
     "hover:shadow-[3px_4px_0_rgba(29,27,22,0.45)]",
     "active:translate-x-[2px] active:translate-y-[3px] active:shadow-none",
-    "disabled:cursor-default disabled:opacity-40 disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0",
+    "disabled:cursor-default disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0",
+    tone === "paid" ? "disabled:opacity-100" : "disabled:opacity-40",
     CANDY_SIZES[size],
     CANDY_TONES[tone],
   ].join(" ");

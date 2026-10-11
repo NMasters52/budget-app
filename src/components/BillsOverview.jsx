@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import {
   IoAdd,
   IoClose,
+  IoChevronDown,
   IoCreateOutline,
   IoTrashOutline,
 } from "react-icons/io5";
@@ -223,7 +224,7 @@ const BillsOverview = ({ bills = [], setBills, today }) => {
     return (
       <div className="flex items-center justify-end gap-1.5">
         <CandyButton
-          tone={needsReview ? "mango" : isPaid ? "ghost" : "coral"}
+          tone={needsReview ? "mango" : isPaid ? "paid" : "coral"}
           size="sm"
           onClick={() => handleMarkPaid(bill.id)}
           disabled={isPaid}
@@ -336,18 +337,24 @@ const BillsOverview = ({ bills = [], setBills, today }) => {
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-end">
                 <div>
                   <label htmlFor="bill-sort" className={`${labelClass} mb-1.5`}>Sort bills by</label>
-                  <select
-                    id="bill-sort"
-                    name="bill-sort"
-                    value={sort}
-                    onChange={(event) => updateParams({ sort: event.target.value === "due" ? null : event.target.value })}
-                    className={`${inputClass} cursor-pointer`}
-                  >
-                    <option value="due">Due date, soonest first</option>
-                    <option value="amount-high">Amount, highest first</option>
-                    <option value="amount-low">Amount, lowest first</option>
-                    <option value="name">Bill name, A to Z</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="bill-sort"
+                      name="bill-sort"
+                      value={sort}
+                      onChange={(event) => updateParams({ sort: event.target.value === "due" ? null : event.target.value })}
+                      className={`${inputClass} h-12 appearance-none cursor-pointer pr-12`}
+                    >
+                      <option value="due">Due date, soonest first</option>
+                      <option value="amount-high">Amount, highest first</option>
+                      <option value="amount-low">Amount, lowest first</option>
+                      <option value="name">Bill name, A to Z</option>
+                    </select>
+                    <IoChevronDown
+                      aria-hidden="true"
+                      className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1d1b16]"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="bill-from-date" className={`${labelClass} mb-1.5`}>From</label>
@@ -357,7 +364,7 @@ const BillsOverview = ({ bills = [], setBills, today }) => {
                     type="date"
                     value={fromDate}
                     onChange={(event) => updateParams({ from: event.target.value || null })}
-                    className={inputClass}
+                    className={`${inputClass} h-12`}
                   />
                 </div>
                 <div>
@@ -368,7 +375,7 @@ const BillsOverview = ({ bills = [], setBills, today }) => {
                     type="date"
                     value={toDate}
                     onChange={(event) => updateParams({ to: event.target.value || null })}
-                    className={inputClass}
+                    className={`${inputClass} h-12`}
                   />
                 </div>
               </div>
