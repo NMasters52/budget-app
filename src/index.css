@@ -51,10 +51,10 @@
   background-size: 22px 22px;
 }
 
-/* Coral-tinted selection to match the accent */
+/* Spider-Man-inspired crimson-pink text selection */
 ::selection {
-  background-color: #ffd9cd;
-  color: #1d1b16;
+  background-color: #e3264f;
+  color: #ffffff;
 }
 
 button:not(:disabled) {
